@@ -1,6 +1,7 @@
 import os
 import json
 import time
+import re
 import requests
 from jobspy import scrape_jobs
 
@@ -13,11 +14,18 @@ TELEGRAM_BOT_TOKEN = raw_token
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "").strip()
 SEEN_JOBS_FILE = "seen_jobs.json"
 
-# Keywords targeting SDE-2 Java / Backend Roles
+# Target Keywords for SDE-1 / SDE-2 / Mid-Level Backend Roles
 ROLE_KEYWORDS = [
-    "java", "spring", "backend", "sde 2", "sde-2", "sde ii", 
-    "software engineer 2", "software development engineer ii",
-    "microservices", "distributed", "platform", "senior engineer"
+    "java", "spring", "backend", "sde 2", "sde-2", "sde ii", "sde 1", "sde-1", "sde i",
+    "software engineer 2", "software development engineer ii", "software engineer",
+    "microservices", "distributed", "platform"
+]
+
+# Exclude Titles meant for 6+ YOE / Senior Leadership
+EXCLUDE_TITLE_KEYWORDS = [
+    "sde 3", "sde-3", "sde iii", "sde3", "sde 4", "sde-4", "sde iv", "sde4",
+    "staff", "principal", "director", "head of", "lead engineer", "tech lead",
+    "engineering manager", "manager", "architect", "senior manager", "sr manager"
 ]
 
 # Location Keywords
@@ -25,9 +33,6 @@ LOCATION_KEYWORDS = [
     "bengaluru", "bangalore", "karnataka", "india", "remote"
 ]
 
-# ---------------------------------------------------------
-# Company Lists by ATS Engine
-# ---------------------------------------------------------
 GREENHOUSE_COMPANIES = [
     "razorpay", "atlassian", "cred", "swiggy", "sharechat", 
     "phonepe", "commvault", "arcesium", "blinkit", "zomato", 
@@ -41,10 +46,6 @@ LEVER_COMPANIES = [
 
 ASHBY_COMPANIES = [
     "rippling", "notion", "figma", "ramp", "airtable"
-]
-
-SMARTRECRUITERS_COMPANIES = [
-    "visa", "boschgroup"
 ]
 
 def load_seen_jobs():
@@ -64,6 +65,38 @@ def is_valid_location(location_str):
     loc = (location_str or "").lower()
     return any(lk in loc for lk in LOCATION_KEYWORDS)
 
+def is_valid_experience(title, description=""):
+    """
+    Returns True ONLY if experience required is 5 years or less.
+    Filters out roles explicitly requiring >5 YOE or SDE-3+ titles.
+    """
+    title_lower = title.lower()
+    text_combined = f"{title} {description}".lower()
+
+    # 1. Check title exclusions
+    for ex in EXCLUDE_TITLE_KEYWORDS:
+        if ex in title_lower:
+            return False
+
+    # 2. Regex pattern to catch experience mentions like "6+ years", "7-10 yrs", "8+ yoe"
+    experience_patterns = [
+        r'(\d+)\+?\s*(?:-\s*\d+\s*)?(?:years|yrs|yoe)',
+        r'(?:minimum|at least|req|requires)\s*(\d+)\+?\s*(?:years|yrs|yoe)'
+    ]
+
+    for pattern in experience_patterns:
+        matches = re.findall(pattern, text_combined)
+        for m in matches:
+            try:
+                min_years = int(m)
+                # If required years is strictly greater than 5, reject
+                if min_years > 5:
+                    return False
+            except ValueError:
+                pass
+
+    return True
+
 def send_telegram_alert(job_title, company, job_url, location, source="Career Site"):
     if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
         print("CRITICAL ERROR: TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID missing!")
@@ -74,7 +107,7 @@ def send_telegram_alert(job_title, company, job_url, location, source="Career Si
     clean_location = str(location).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
     message = (
-        f"🚨 <b>NEW SDE-2 JOB DETECTED!</b>\n\n"
+        f"🚨 <b>NEW SDE-2 JOB DETECTED (≤ 5 YOE)!</b>\n\n"
         f"🏢 <b>Company:</b> {clean_company.upper()}\n"
         f"💼 <b>Role:</b> {clean_title}\n"
         f"📍 <b>Location:</b> {clean_location}\n"
@@ -103,34 +136,6 @@ def send_telegram_alert(job_title, company, job_url, location, source="Career Si
 # Scraper Engines
 # ---------------------------------------------------------
 
-def fetch_linkedin_and_indeed_jobs():
-    """Scrapes LinkedIn and Indeed directly for live SDE-2 roles in Bengaluru"""
-    new_jobs = []
-    print("Scraping LinkedIn & Indeed via JobSpy...")
-    try:
-        jobs = scrape_jobs(
-            site_name=["linkedin", "indeed"],
-            search_term="SDE 2 Java Spring Boot",
-            location="Bengaluru, Karnataka, India",
-            results_wanted=15,
-            hours_old=12,
-            country_indeed='India'
-        )
-        if jobs is not None and not jobs.empty:
-            for _, row in jobs.iterrows():
-                title = str(row.get('title', ''))
-                company = str(row.get('company', 'Unknown'))
-                job_url = str(row.get('job_url', ''))
-                job_id = f"jobspy_{row.get('id', hash(job_url))}"
-                location = str(row.get('location', 'Bengaluru, India'))
-                site = str(row.get('site', 'LinkedIn/Indeed')).title()
-
-                if any(kw in title.lower() for kw in ROLE_KEYWORDS) and is_valid_location(location):
-                    new_jobs.append((job_id, title, company, job_url, location, site))
-    except Exception as e:
-        print(f"Error scraping LinkedIn/Indeed: {e}")
-    return new_jobs
-
 def fetch_greenhouse_jobs():
     new_jobs = []
     headers = {"User-Agent": "Mozilla/5.0"}
@@ -146,7 +151,9 @@ def fetch_greenhouse_jobs():
                     job_url = job.get("absolute_url", "")
                     location = job.get("location", {}).get("name", "Bengaluru, India")
                     
-                    if any(kw in title.lower() for kw in ROLE_KEYWORDS) and is_valid_location(location):
+                    if (any(kw in title.lower() for kw in ROLE_KEYWORDS) and 
+                        is_valid_location(location) and 
+                        is_valid_experience(title)):
                         new_jobs.append((job_id, title, company, job_url, location, "Greenhouse"))
         except Exception as e:
             print(f"Error fetching Greenhouse ({company}): {e}")
@@ -166,8 +173,11 @@ def fetch_lever_jobs():
                     job_id = f"{company}_{job.get('id')}"
                     job_url = job.get("hostedUrl", "")
                     location = job.get("categories", {}).get("location", "Bengaluru, India")
+                    description = job.get("descriptionPlain", "")
                     
-                    if any(kw in title.lower() for kw in ROLE_KEYWORDS) and is_valid_location(location):
+                    if (any(kw in title.lower() for kw in ROLE_KEYWORDS) and 
+                        is_valid_location(location) and 
+                        is_valid_experience(title, description)):
                         new_jobs.append((job_id, title, company, job_url, location, "Lever"))
         except Exception as e:
             print(f"Error fetching Lever ({company}): {e}")
@@ -188,7 +198,9 @@ def fetch_ashby_jobs():
                     job_url = job.get("jobUrl", "")
                     location = job.get("location", "Bengaluru, India")
                     
-                    if any(kw in title.lower() for kw in ROLE_KEYWORDS) and is_valid_location(location):
+                    if (any(kw in title.lower() for kw in ROLE_KEYWORDS) and 
+                        is_valid_location(location) and 
+                        is_valid_experience(title)):
                         new_jobs.append((job_id, title, company, job_url, location, "Ashby"))
         except Exception as e:
             print(f"Error fetching Ashby ({company}): {e}")
@@ -207,8 +219,11 @@ def fetch_amazon_jobs():
                 job_id = f"amazon_{job.get('id_icims')}"
                 job_url = f"https://www.amazon.jobs{job.get('job_path')}"
                 location = job.get("location", "Bengaluru, India")
+                description = job.get("description", "")
                 
-                if any(kw in title.lower() for kw in ROLE_KEYWORDS) and is_valid_location(location):
+                if (any(kw in title.lower() for kw in ROLE_KEYWORDS) and 
+                    is_valid_location(location) and 
+                    is_valid_experience(title, description)):
                     new_jobs.append((job_id, title, "Amazon", job_url, location, "Amazon Careers"))
     except Exception as e:
         print(f"Error fetching Amazon: {e}")
@@ -229,7 +244,9 @@ def fetch_microsoft_jobs():
                 job_url = f"https://jobs.careers.microsoft.com/global/en/job/{job.get('jobId')}"
                 location = job.get("properties", {}).get("primaryLocation", "Bengaluru, India")
                 
-                if any(kw in title.lower() for kw in ROLE_KEYWORDS) and is_valid_location(location):
+                if (any(kw in title.lower() for kw in ROLE_KEYWORDS) and 
+                    is_valid_location(location) and 
+                    is_valid_experience(title)):
                     new_jobs.append((job_id, title, "Microsoft", job_url, location, "Microsoft Careers"))
     except Exception as e:
         print(f"Error fetching Microsoft: {e}")
@@ -257,11 +274,43 @@ def fetch_enterprise_jobs():
                     job_url = pos.get("canonicalPositionUrl", f"https://{company.lower()}.com/careers")
                     location = pos.get("location", "Bengaluru, India")
                     
-                    if any(kw in title.lower() for kw in ROLE_KEYWORDS) and is_valid_location(location):
+                    if (any(kw in title.lower() for kw in ROLE_KEYWORDS) and 
+                        is_valid_location(location) and 
+                        is_valid_experience(title)):
                         new_jobs.append((job_id, title, company, job_url, location, f"{company} Careers"))
         except Exception as e:
             print(f"Error fetching Enterprise API ({company}): {e}")
             
+    return new_jobs
+
+def fetch_linkedin_and_indeed_jobs():
+    new_jobs = []
+    print("Scraping LinkedIn & Indeed via JobSpy...")
+    try:
+        jobs = scrape_jobs(
+            site_name=["linkedin", "indeed"],
+            search_term="SDE 2 Java Spring Boot",
+            location="Bengaluru, Karnataka, India",
+            results_wanted=15,
+            hours_old=12,
+            country_indeed='India'
+        )
+        if jobs is not None and not jobs.empty:
+            for _, row in jobs.iterrows():
+                title = str(row.get('title', ''))
+                company = str(row.get('company', 'Unknown'))
+                job_url = str(row.get('job_url', ''))
+                job_id = f"jobspy_{row.get('id', hash(job_url))}"
+                location = str(row.get('location', 'Bengaluru, India'))
+                site = str(row.get('site', 'LinkedIn/Indeed')).title()
+                description = str(row.get('description', ''))
+
+                if (any(kw in title.lower() for kw in ROLE_KEYWORDS) and 
+                    is_valid_location(location) and 
+                    is_valid_experience(title, description)):
+                    new_jobs.append((job_id, title, company, job_url, location, site))
+    except Exception as e:
+        print(f"Error scraping LinkedIn/Indeed: {e}")
     return new_jobs
 
 def main():
@@ -277,7 +326,7 @@ def main():
         fetch_linkedin_and_indeed_jobs()
     )
     
-    print(f"Found {len(all_jobs)} matching SDE-2/Backend roles across all sources.")
+    print(f"Found {len(all_jobs)} matching SDE-2/Backend roles (<= 5 YOE) in Bengaluru.")
     
     new_alert_count = 0
     for job_id, title, company, job_url, location, source in all_jobs:
