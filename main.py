@@ -2,34 +2,49 @@ import os
 import json
 import time
 import requests
+from jobspy import scrape_jobs
 
-# Sanitize environment variables to strip leading/trailing spaces or unwanted 'bot' prefixes
+# Clean environment variables
 raw_token = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
 if raw_token.lower().startswith("bot"):
-    raw_token = raw_token[3:]  # Strip 'bot' prefix if accidentally included in GitHub secret
+    raw_token = raw_token[3:]
 
 TELEGRAM_BOT_TOKEN = raw_token
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "").strip()
 SEEN_JOBS_FILE = "seen_jobs.json"
 
+# Keywords targeting SDE-2 Java / Backend Roles
 ROLE_KEYWORDS = [
     "java", "spring", "backend", "sde 2", "sde-2", "sde ii", 
     "software engineer 2", "software development engineer ii",
     "microservices", "distributed", "platform", "senior engineer"
 ]
 
+# Location Keywords
 LOCATION_KEYWORDS = [
     "bengaluru", "bangalore", "karnataka", "india", "remote"
 ]
 
+# ---------------------------------------------------------
+# Company Lists by ATS Engine
+# ---------------------------------------------------------
 GREENHOUSE_COMPANIES = [
     "razorpay", "atlassian", "cred", "swiggy", "sharechat", 
     "phonepe", "commvault", "arcesium", "blinkit", "zomato", 
-    "coupang", "intuit", "rubrik"
+    "coupang", "intuit", "rubrik", "inmobi", "meesho", "dream11",
+    "paytm", "urbancompany", "coindcx", "druva"
 ]
 
 LEVER_COMPANIES = [
-    "zepto", "uber", "flipkart", "deshaw", "myntra"
+    "zepto", "uber", "flipkart", "deshaw", "myntra", "groww", "postman"
+]
+
+ASHBY_COMPANIES = [
+    "rippling", "notion", "figma", "ramp", "airtable"
+]
+
+SMARTRECRUITERS_COMPANIES = [
+    "visa", "boschgroup"
 ]
 
 def load_seen_jobs():
@@ -49,9 +64,9 @@ def is_valid_location(location_str):
     loc = (location_str or "").lower()
     return any(lk in loc for lk in LOCATION_KEYWORDS)
 
-def send_telegram_alert(job_title, company, job_url, location):
+def send_telegram_alert(job_title, company, job_url, location, source="Career Site"):
     if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
-        print("CRITICAL ERROR: TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID is missing from GitHub Secrets!")
+        print("CRITICAL ERROR: TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID missing!")
         return
 
     clean_title = str(job_title).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
@@ -59,10 +74,11 @@ def send_telegram_alert(job_title, company, job_url, location):
     clean_location = str(location).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
     message = (
-        f"🚨 <b>NEW BENGALURU / INDIA JOB DETECTED!</b>\n\n"
+        f"🚨 <b>NEW SDE-2 JOB DETECTED!</b>\n\n"
         f"🏢 <b>Company:</b> {clean_company.upper()}\n"
         f"💼 <b>Role:</b> {clean_title}\n"
-        f"📍 <b>Location:</b> {clean_location}\n\n"
+        f"📍 <b>Location:</b> {clean_location}\n"
+        f"🌐 <b>Source:</b> {source}\n\n"
         f'🔗 <a href="{job_url}">Apply Immediately</a>'
     )
     
@@ -79,9 +95,41 @@ def send_telegram_alert(job_title, company, job_url, location):
         if res.status_code != 200:
             print(f"Telegram API Error ({res.status_code}): {res.text}")
     except Exception as e:
-        print(f"Error sending Telegram alert: {e}")
+        print(f"Error sending alert: {e}")
         
     time.sleep(0.5)
+
+# ---------------------------------------------------------
+# Scraper Engines
+# ---------------------------------------------------------
+
+def fetch_linkedin_and_indeed_jobs():
+    """Scrapes LinkedIn and Indeed directly for live SDE-2 roles in Bengaluru"""
+    new_jobs = []
+    print("Scraping LinkedIn & Indeed via JobSpy...")
+    try:
+        jobs = scrape_jobs(
+            site_name=["linkedin", "indeed"],
+            search_term="SDE 2 Java Spring Boot",
+            location="Bengaluru, Karnataka, India",
+            results_wanted=15,
+            hours_old=12,
+            country_indeed='India'
+        )
+        if jobs is not None and not jobs.empty:
+            for _, row in jobs.iterrows():
+                title = str(row.get('title', ''))
+                company = str(row.get('company', 'Unknown'))
+                job_url = str(row.get('job_url', ''))
+                job_id = f"jobspy_{row.get('id', hash(job_url))}"
+                location = str(row.get('location', 'Bengaluru, India'))
+                site = str(row.get('site', 'LinkedIn/Indeed')).title()
+
+                if any(kw in title.lower() for kw in ROLE_KEYWORDS) and is_valid_location(location):
+                    new_jobs.append((job_id, title, company, job_url, location, site))
+    except Exception as e:
+        print(f"Error scraping LinkedIn/Indeed: {e}")
+    return new_jobs
 
 def fetch_greenhouse_jobs():
     new_jobs = []
@@ -99,7 +147,7 @@ def fetch_greenhouse_jobs():
                     location = job.get("location", {}).get("name", "Bengaluru, India")
                     
                     if any(kw in title.lower() for kw in ROLE_KEYWORDS) and is_valid_location(location):
-                        new_jobs.append((job_id, title, company, job_url, location))
+                        new_jobs.append((job_id, title, company, job_url, location, "Greenhouse"))
         except Exception as e:
             print(f"Error fetching Greenhouse ({company}): {e}")
     return new_jobs
@@ -120,9 +168,30 @@ def fetch_lever_jobs():
                     location = job.get("categories", {}).get("location", "Bengaluru, India")
                     
                     if any(kw in title.lower() for kw in ROLE_KEYWORDS) and is_valid_location(location):
-                        new_jobs.append((job_id, title, company, job_url, location))
+                        new_jobs.append((job_id, title, company, job_url, location, "Lever"))
         except Exception as e:
             print(f"Error fetching Lever ({company}): {e}")
+    return new_jobs
+
+def fetch_ashby_jobs():
+    new_jobs = []
+    headers = {"User-Agent": "Mozilla/5.0"}
+    for company in ASHBY_COMPANIES:
+        url = f"https://api.ashbyhq.com/posting-api/job-board/{company}"
+        try:
+            res = requests.get(url, headers=headers, timeout=10)
+            if res.status_code == 200:
+                data = res.json()
+                for job in data.get("jobs", []):
+                    title = job.get("title", "")
+                    job_id = f"ashby_{company}_{job.get('id')}"
+                    job_url = job.get("jobUrl", "")
+                    location = job.get("location", "Bengaluru, India")
+                    
+                    if any(kw in title.lower() for kw in ROLE_KEYWORDS) and is_valid_location(location):
+                        new_jobs.append((job_id, title, company, job_url, location, "Ashby"))
+        except Exception as e:
+            print(f"Error fetching Ashby ({company}): {e}")
     return new_jobs
 
 def fetch_amazon_jobs():
@@ -140,7 +209,7 @@ def fetch_amazon_jobs():
                 location = job.get("location", "Bengaluru, India")
                 
                 if any(kw in title.lower() for kw in ROLE_KEYWORDS) and is_valid_location(location):
-                    new_jobs.append((job_id, title, "Amazon", job_url, location))
+                    new_jobs.append((job_id, title, "Amazon", job_url, location, "Amazon Careers"))
     except Exception as e:
         print(f"Error fetching Amazon: {e}")
     return new_jobs
@@ -153,9 +222,7 @@ def fetch_microsoft_jobs():
         res = requests.get(url, headers=headers, timeout=10)
         if res.status_code == 200:
             data = res.json()
-            operation_result = data.get("operationResult", {})
-            result = operation_result.get("result", {})
-            jobs = result.get("jobs", [])
+            jobs = data.get("operationResult", {}).get("result", {}).get("jobs", [])
             for job in jobs:
                 title = job.get("title", "")
                 job_id = f"microsoft_{job.get('jobId')}"
@@ -163,7 +230,7 @@ def fetch_microsoft_jobs():
                 location = job.get("properties", {}).get("primaryLocation", "Bengaluru, India")
                 
                 if any(kw in title.lower() for kw in ROLE_KEYWORDS) and is_valid_location(location):
-                    new_jobs.append((job_id, title, "Microsoft", job_url, location))
+                    new_jobs.append((job_id, title, "Microsoft", job_url, location, "Microsoft Careers"))
     except Exception as e:
         print(f"Error fetching Microsoft: {e}")
     return new_jobs
@@ -191,7 +258,7 @@ def fetch_enterprise_jobs():
                     location = pos.get("location", "Bengaluru, India")
                     
                     if any(kw in title.lower() for kw in ROLE_KEYWORDS) and is_valid_location(location):
-                        new_jobs.append((job_id, title, company, job_url, location))
+                        new_jobs.append((job_id, title, company, job_url, location, f"{company} Careers"))
         except Exception as e:
             print(f"Error fetching Enterprise API ({company}): {e}")
             
@@ -203,17 +270,19 @@ def main():
     all_jobs = (
         fetch_greenhouse_jobs() + 
         fetch_lever_jobs() + 
+        fetch_ashby_jobs() +
         fetch_amazon_jobs() + 
         fetch_microsoft_jobs() + 
-        fetch_enterprise_jobs()
+        fetch_enterprise_jobs() +
+        fetch_linkedin_and_indeed_jobs()
     )
     
-    print(f"Found {len(all_jobs)} matching SDE-2/Backend roles in Bengaluru/India.")
+    print(f"Found {len(all_jobs)} matching SDE-2/Backend roles across all sources.")
     
     new_alert_count = 0
-    for job_id, title, company, job_url, location in all_jobs:
+    for job_id, title, company, job_url, location, source in all_jobs:
         if job_id not in seen_jobs:
-            send_telegram_alert(title, company, job_url, location)
+            send_telegram_alert(title, company, job_url, location, source)
             seen_jobs.add(job_id)
             new_alert_count += 1
             
