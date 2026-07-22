@@ -3,8 +3,13 @@ import json
 import time
 import requests
 
-TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
+# Sanitize environment variables to strip leading/trailing spaces or unwanted 'bot' prefixes
+raw_token = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
+if raw_token.lower().startswith("bot"):
+    raw_token = raw_token[3:]  # Strip 'bot' prefix if accidentally included in GitHub secret
+
+TELEGRAM_BOT_TOKEN = raw_token
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "").strip()
 SEEN_JOBS_FILE = "seen_jobs.json"
 
 ROLE_KEYWORDS = [
@@ -45,7 +50,10 @@ def is_valid_location(location_str):
     return any(lk in loc for lk in LOCATION_KEYWORDS)
 
 def send_telegram_alert(job_title, company, job_url, location):
-    # HTML escape special characters to prevent Telegram API formatting errors
+    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
+        print("CRITICAL ERROR: TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID is missing from GitHub Secrets!")
+        return
+
     clean_title = str(job_title).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
     clean_company = str(company).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
     clean_location = str(location).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
@@ -73,7 +81,7 @@ def send_telegram_alert(job_title, company, job_url, location):
     except Exception as e:
         print(f"Error sending Telegram alert: {e}")
         
-    time.sleep(0.5)  # 0.5 sec delay prevents Telegram rate-limiting
+    time.sleep(0.5)
 
 def fetch_greenhouse_jobs():
     new_jobs = []
