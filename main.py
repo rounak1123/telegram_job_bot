@@ -5,7 +5,6 @@ import re
 import requests
 from jobspy import scrape_jobs
 
-# Clean environment variables
 raw_token = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
 if raw_token.lower().startswith("bot"):
     raw_token = raw_token[3:]
@@ -14,24 +13,31 @@ TELEGRAM_BOT_TOKEN = raw_token
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "").strip()
 SEEN_JOBS_FILE = "seen_jobs.json"
 
-# Target Keywords for SDE-1 / SDE-2 / Mid-Level Backend Roles
-ROLE_KEYWORDS = [
+# Strict Backend/SDE-2 Role Keywords
+MUST_INCLUDE_KEYWORDS = [
     "java", "spring", "backend", "sde 2", "sde-2", "sde ii", "sde 1", "sde-1", "sde i",
-    "software engineer 2", "software development engineer ii", "software engineer",
-    "microservices", "distributed", "platform"
+    "software engineer 2", "software development engineer ii", "software engineer - backend",
+    "microservices", "distributed systems"
 ]
 
-# Exclude Titles meant for 6+ YOE / Senior Leadership
-EXCLUDE_TITLE_KEYWORDS = [
+# Strict Negative Filter (Excludes non-backend & senior roles)
+EXCLUDE_KEYWORDS = [
+    "frontend", "react", "angular", "vue", "ui", "ux", "android", "ios", "mobile",
+    "qa", "sdet", "test", "testing", "devops", "sre", "infrastructure", "cloud engineer",
+    "intern", "fresher", "trainee", "graduate",
     "sde 3", "sde-3", "sde iii", "sde3", "sde 4", "sde-4", "sde iv", "sde4",
-    "staff", "principal", "director", "head of", "lead engineer", "tech lead",
-    "engineering manager", "manager", "architect", "senior manager", "sr manager"
+    "staff", "principal", "director", "head of", "lead", "tech lead",
+    "engineering manager", "manager", "architect", "senior manager"
 ]
 
-# Location Keywords
-LOCATION_KEYWORDS = [
-    "bengaluru", "bangalore", "karnataka", "india", "remote"
-]
+LOCATION_KEYWORDS = ["bengaluru", "bangalore", "karnataka", "india", "remote"]
+
+# Real Browser Headers to bypass GitHub Runner WAF blocks
+HTTP_HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+    "Accept": "application/json, text/plain, */*",
+    "Accept-Language": "en-US,en;q=0.9",
+}
 
 GREENHOUSE_COMPANIES = [
     "razorpay", "atlassian", "cred", "swiggy", "sharechat", 
@@ -42,10 +48,6 @@ GREENHOUSE_COMPANIES = [
 
 LEVER_COMPANIES = [
     "zepto", "uber", "flipkart", "deshaw", "myntra", "groww", "postman"
-]
-
-ASHBY_COMPANIES = [
-    "rippling", "notion", "figma", "ramp", "airtable"
 ]
 
 def load_seen_jobs():
@@ -65,41 +67,29 @@ def is_valid_location(location_str):
     loc = (location_str or "").lower()
     return any(lk in loc for lk in LOCATION_KEYWORDS)
 
-def is_valid_experience(title, description=""):
-    """
-    Returns True ONLY if experience required is 5 years or less.
-    Filters out roles explicitly requiring >5 YOE or SDE-3+ titles.
-    """
+def is_target_role(title, description=""):
     title_lower = title.lower()
     text_combined = f"{title} {description}".lower()
 
-    # 1. Check title exclusions
-    for ex in EXCLUDE_TITLE_KEYWORDS:
-        if ex in title_lower:
-            return False
+    # Reject if any exclude keyword is in the title
+    if any(ex in title_lower for ex in EXCLUDE_KEYWORDS):
+        return False
 
-    # 2. Regex pattern to catch experience mentions like "6+ years", "7-10 yrs", "8+ yoe"
-    experience_patterns = [
-        r'(\d+)\+?\s*(?:-\s*\d+\s*)?(?:years|yrs|yoe)',
-        r'(?:minimum|at least|req|requires)\s*(\d+)\+?\s*(?:years|yrs|yoe)'
-    ]
+    # Check for YOE > 5 in title or description
+    yoe_matches = re.findall(r'(\d+)\+?\s*(?:-\s*\d+\s*)?(?:years|yrs|yoe)', text_combined)
+    for m in yoe_matches:
+        try:
+            if int(m) > 5:
+                return False
+        except ValueError:
+            pass
 
-    for pattern in experience_patterns:
-        matches = re.findall(pattern, text_combined)
-        for m in matches:
-            try:
-                min_years = int(m)
-                # If required years is strictly greater than 5, reject
-                if min_years > 5:
-                    return False
-            except ValueError:
-                pass
-
-    return True
+    # Must match at least one backend role keyword
+    return any(kw in title_lower for kw in MUST_INCLUDE_KEYWORDS)
 
 def send_telegram_alert(job_title, company, job_url, location, source="Career Site"):
     if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
-        print("CRITICAL ERROR: TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID missing!")
+        print("CRITICAL ERROR: Credentials missing!")
         return
 
     clean_title = str(job_title).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
@@ -107,7 +97,7 @@ def send_telegram_alert(job_title, company, job_url, location, source="Career Si
     clean_location = str(location).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
     message = (
-        f"🚨 <b>NEW SDE-2 JOB DETECTED (≤ 5 YOE)!</b>\n\n"
+        f"🚨 <b>NEW SDE-2 BACKEND JOB DETECTED!</b>\n\n"
         f"🏢 <b>Company:</b> {clean_company.upper()}\n"
         f"💼 <b>Role:</b> {clean_title}\n"
         f"📍 <b>Location:</b> {clean_location}\n"
@@ -138,11 +128,10 @@ def send_telegram_alert(job_title, company, job_url, location, source="Career Si
 
 def fetch_greenhouse_jobs():
     new_jobs = []
-    headers = {"User-Agent": "Mozilla/5.0"}
     for company in GREENHOUSE_COMPANIES:
-        url = f"https://boards-api.greenhouse.io/v1/boards/{company}/jobs"
+        url = f"https://boards-api.greenhouse.io/v1/boards/{company}/jobs?content=true"
         try:
-            res = requests.get(url, headers=headers, timeout=10)
+            res = requests.get(url, headers=HTTP_HEADERS, timeout=10)
             if res.status_code == 200:
                 data = res.json()
                 for job in data.get("jobs", []):
@@ -150,22 +139,20 @@ def fetch_greenhouse_jobs():
                     job_id = f"{company}_{job.get('id')}"
                     job_url = job.get("absolute_url", "")
                     location = job.get("location", {}).get("name", "Bengaluru, India")
+                    description = job.get("content", "")
                     
-                    if (any(kw in title.lower() for kw in ROLE_KEYWORDS) and 
-                        is_valid_location(location) and 
-                        is_valid_experience(title)):
+                    if is_valid_location(location) and is_target_role(title, description):
                         new_jobs.append((job_id, title, company, job_url, location, "Greenhouse"))
         except Exception as e:
-            print(f"Error fetching Greenhouse ({company}): {e}")
+            print(f"Error Greenhouse ({company}): {e}")
     return new_jobs
 
 def fetch_lever_jobs():
     new_jobs = []
-    headers = {"User-Agent": "Mozilla/5.0"}
     for company in LEVER_COMPANIES:
         url = f"https://api.lever.co/v0/postings/{company}"
         try:
-            res = requests.get(url, headers=headers, timeout=10)
+            res = requests.get(url, headers=HTTP_HEADERS, timeout=10)
             if res.status_code == 200:
                 data = res.json()
                 for job in data:
@@ -175,43 +162,17 @@ def fetch_lever_jobs():
                     location = job.get("categories", {}).get("location", "Bengaluru, India")
                     description = job.get("descriptionPlain", "")
                     
-                    if (any(kw in title.lower() for kw in ROLE_KEYWORDS) and 
-                        is_valid_location(location) and 
-                        is_valid_experience(title, description)):
+                    if is_valid_location(location) and is_target_role(title, description):
                         new_jobs.append((job_id, title, company, job_url, location, "Lever"))
         except Exception as e:
-            print(f"Error fetching Lever ({company}): {e}")
-    return new_jobs
-
-def fetch_ashby_jobs():
-    new_jobs = []
-    headers = {"User-Agent": "Mozilla/5.0"}
-    for company in ASHBY_COMPANIES:
-        url = f"https://api.ashbyhq.com/posting-api/job-board/{company}"
-        try:
-            res = requests.get(url, headers=headers, timeout=10)
-            if res.status_code == 200:
-                data = res.json()
-                for job in data.get("jobs", []):
-                    title = job.get("title", "")
-                    job_id = f"ashby_{company}_{job.get('id')}"
-                    job_url = job.get("jobUrl", "")
-                    location = job.get("location", "Bengaluru, India")
-                    
-                    if (any(kw in title.lower() for kw in ROLE_KEYWORDS) and 
-                        is_valid_location(location) and 
-                        is_valid_experience(title)):
-                        new_jobs.append((job_id, title, company, job_url, location, "Ashby"))
-        except Exception as e:
-            print(f"Error fetching Ashby ({company}): {e}")
+            print(f"Error Lever ({company}): {e}")
     return new_jobs
 
 def fetch_amazon_jobs():
     new_jobs = []
-    url = "https://www.amazon.jobs/en/search.json?base_query=software%20development%20engineer&loc_query=Bangalore%2C%20Karnataka%2C%20India&result_limit=30&sort=recent"
-    headers = {"User-Agent": "Mozilla/5.0"}
+    url = "https://www.amazon.jobs/en/search.json?base_query=Software%20Development%20Engineer&loc_query=Bangalore%2C%20Karnataka%2C%20India&result_limit=30&sort=recent"
     try:
-        res = requests.get(url, headers=headers, timeout=10)
+        res = requests.get(url, headers=HTTP_HEADERS, timeout=10)
         if res.status_code == 200:
             data = res.json()
             for job in data.get("jobs", []):
@@ -221,96 +182,44 @@ def fetch_amazon_jobs():
                 location = job.get("location", "Bengaluru, India")
                 description = job.get("description", "")
                 
-                if (any(kw in title.lower() for kw in ROLE_KEYWORDS) and 
-                    is_valid_location(location) and 
-                    is_valid_experience(title, description)):
+                if is_valid_location(location) and is_target_role(title, description):
                     new_jobs.append((job_id, title, "Amazon", job_url, location, "Amazon Careers"))
     except Exception as e:
-        print(f"Error fetching Amazon: {e}")
+        print(f"Error Amazon: {e}")
     return new_jobs
 
-def fetch_microsoft_jobs():
+def fetch_google_and_linkedin_jobs():
+    """Scrapes Google Jobs & LinkedIn directly for target MNC roles in Bengaluru"""
     new_jobs = []
-    url = "https://services.careers.microsoft.com/api/v1/search?lc=Bengaluru,%20Karnataka,%20India&p=Software%20Engineering&l=en_us&pg=1&pgSz=20&o=Recent"
-    headers = {"User-Agent": "Mozilla/5.0"}
-    try:
-        res = requests.get(url, headers=headers, timeout=10)
-        if res.status_code == 200:
-            data = res.json()
-            jobs = data.get("operationResult", {}).get("result", {}).get("jobs", [])
-            for job in jobs:
-                title = job.get("title", "")
-                job_id = f"microsoft_{job.get('jobId')}"
-                job_url = f"https://jobs.careers.microsoft.com/global/en/job/{job.get('jobId')}"
-                location = job.get("properties", {}).get("primaryLocation", "Bengaluru, India")
-                
-                if (any(kw in title.lower() for kw in ROLE_KEYWORDS) and 
-                    is_valid_location(location) and 
-                    is_valid_experience(title)):
-                    new_jobs.append((job_id, title, "Microsoft", job_url, location, "Microsoft Careers"))
-    except Exception as e:
-        print(f"Error fetching Microsoft: {e}")
-    return new_jobs
-
-def fetch_enterprise_jobs():
-    new_jobs = []
-    headers = {"User-Agent": "Mozilla/5.0"}
-    enterprise_boards = [
-        {"company": "Salesforce", "url": "https://salesforce.eightfold.ai/api/apply/v2/jobs?domain=salesforce.com&location=Bengaluru&num=20"},
-        {"company": "Goldman Sachs", "url": "https://goldmansachs.eightfold.ai/api/apply/v2/jobs?domain=goldmansachs.com&location=Bengaluru&num=20"},
-        {"company": "Walmart", "url": "https://walmart.eightfold.ai/api/apply/v2/jobs?domain=walmart.com&location=Bengaluru&num=20"},
-        {"company": "Adobe", "url": "https://adobe.eightfold.ai/api/apply/v2/jobs?domain=adobe.com&location=Bengaluru&num=20"}
+    print("Scraping Google Jobs & LinkedIn via JobSpy...")
+    queries = [
+        "SDE 2 Java Backend Bengaluru",
+        "Software Engineer II Backend Bangalore",
+        "SDE 2 Spring Boot Bengaluru"
     ]
-    
-    for board in enterprise_boards:
-        company = board["company"]
+    for q in queries:
         try:
-            res = requests.get(board["url"], headers=headers, timeout=10)
-            if res.status_code == 200:
-                data = res.json()
-                for pos in data.get("positions", []):
-                    title = pos.get("name", "")
-                    job_id = f"{company.lower()}_{pos.get('id')}"
-                    job_url = pos.get("canonicalPositionUrl", f"https://{company.lower()}.com/careers")
-                    location = pos.get("location", "Bengaluru, India")
-                    
-                    if (any(kw in title.lower() for kw in ROLE_KEYWORDS) and 
-                        is_valid_location(location) and 
-                        is_valid_experience(title)):
-                        new_jobs.append((job_id, title, company, job_url, location, f"{company} Careers"))
+            jobs = scrape_jobs(
+                site_name=["google", "linkedin"],
+                search_term=q,
+                location="Bengaluru, Karnataka, India",
+                results_wanted=15,
+                hours_old=24
+            )
+            if jobs is not None and not jobs.empty:
+                for _, row in jobs.iterrows():
+                    title = str(row.get('title', ''))
+                    company = str(row.get('company', 'Unknown'))
+                    job_url = str(row.get('job_url', ''))
+                    job_id = f"jobspy_{row.get('id', hash(job_url))}"
+                    location = str(row.get('location', 'Bengaluru, India'))
+                    site = str(row.get('site', 'Google/LinkedIn')).title()
+                    description = str(row.get('description', ''))
+
+                    if is_valid_location(location) and is_target_role(title, description):
+                        new_jobs.append((job_id, title, company, job_url, location, site))
         except Exception as e:
-            print(f"Error fetching Enterprise API ({company}): {e}")
-            
-    return new_jobs
-
-def fetch_linkedin_and_indeed_jobs():
-    new_jobs = []
-    print("Scraping LinkedIn & Indeed via JobSpy...")
-    try:
-        jobs = scrape_jobs(
-            site_name=["linkedin", "indeed"],
-            search_term="SDE 2 Java Spring Boot",
-            location="Bengaluru, Karnataka, India",
-            results_wanted=15,
-            hours_old=12,
-            country_indeed='India'
-        )
-        if jobs is not None and not jobs.empty:
-            for _, row in jobs.iterrows():
-                title = str(row.get('title', ''))
-                company = str(row.get('company', 'Unknown'))
-                job_url = str(row.get('job_url', ''))
-                job_id = f"jobspy_{row.get('id', hash(job_url))}"
-                location = str(row.get('location', 'Bengaluru, India'))
-                site = str(row.get('site', 'LinkedIn/Indeed')).title()
-                description = str(row.get('description', ''))
-
-                if (any(kw in title.lower() for kw in ROLE_KEYWORDS) and 
-                    is_valid_location(location) and 
-                    is_valid_experience(title, description)):
-                    new_jobs.append((job_id, title, company, job_url, location, site))
-    except Exception as e:
-        print(f"Error scraping LinkedIn/Indeed: {e}")
+            print(f"Error searching ({q}): {e}")
     return new_jobs
 
 def main():
@@ -319,14 +228,11 @@ def main():
     all_jobs = (
         fetch_greenhouse_jobs() + 
         fetch_lever_jobs() + 
-        fetch_ashby_jobs() +
         fetch_amazon_jobs() + 
-        fetch_microsoft_jobs() + 
-        fetch_enterprise_jobs() +
-        fetch_linkedin_and_indeed_jobs()
+        fetch_google_and_linkedin_jobs()
     )
     
-    print(f"Found {len(all_jobs)} matching SDE-2/Backend roles (<= 5 YOE) in Bengaluru.")
+    print(f"Filtered down to {len(all_jobs)} verified SDE-2 Backend roles in Bengaluru.")
     
     new_alert_count = 0
     for job_id, title, company, job_url, location, source in all_jobs:
