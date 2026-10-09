@@ -427,9 +427,7 @@ def a_eightfold(host, domain, query="software engineer", location="Bengaluru"):
                 return out
         except Exception as e:  # noqa: BLE001
             errs.append(f"{kind}: {e}")
-    if errs:
-        raise RuntimeError("; ".join(errs)[:200])
-    return out
+    raise RuntimeError("; ".join(errs)[:200] or "no positions returned")
 
 
 def a_microsoft():
@@ -580,8 +578,13 @@ def fetch_company(c, cached, fails):
     for spec in specs:
         try:
             jobs = ADAPTERS[spec[0]](*spec[1:])
-            if use_cached or validate(c, spec, jobs):
-                return jobs, spec, None, use_cached
+            if use_cached:
+                return jobs, spec, None, True
+            if spec[0] not in VERIFY_INDIA and not jobs:
+                last = f"{spec[0]}: endpoint answered but returned 0 jobs (params/endpoint probably wrong)"
+                continue
+            if validate(c, spec, jobs):
+                return jobs, spec, None, False
             last = f"{spec[0]}:{spec[1] if len(spec) > 1 else ''} rejected (does not look like {c['name']})"
         except Exception as e:  # noqa: BLE001
             last = f"{spec[0]}: {type(e).__name__}: {str(e)[:110]}"
@@ -836,6 +839,7 @@ def main():
                     warnings.append(f"{name}: direct source failing ({err}); falling back to search")
             unresolved.append(c)
             report.append((name, "FALLBACK", err or "no direct source configured", 0, 0, []))
+            print(f"FALLBACK  {name}: {err or 'no direct source configured'}")
             continue
         st["fails"][name] = 0
         st["resolved"][name] = list(spec)
@@ -843,6 +847,7 @@ def main():
             j["company"], j["id"] = name, f"{slug}|{j['raw_id']}"
         cand = [j for j in jobs if phase1(j)]
         report.append((name, f"{spec[0]}:{spec[1] if len(spec) > 1 else ''}", "", len(jobs), len(cand), cand))
+        print(f"DIRECT    {name}: {spec[0]}:{spec[1] if len(spec) > 1 else ''} -> {len(jobs)} jobs, {len(cand)} Bengaluru+role")
         if check:
             pending += [(c, j) for j in cand[:10]]
             continue
@@ -963,13 +968,15 @@ def main():
 
     # ---- E. status message: first run / daily heartbeat / warnings
     direct = sum(1 for r in report if r[1] != "FALLBACK")
+    fallback_names = [r[0] for r in report if r[1] == "FALLBACK"]
     if seeded or warnings or now - st["last_hb"] > HEARTBEAT_HOURS * 3600 - 600:
-        msg = [f"✅ <b>Job tracker status</b>",
-               f"Direct career-API coverage: {direct}/{len(report)} companies",
-               f"Fallback (search) only: {len(report) - direct}",
+        msg = ["✅ <b>Job tracker status</b>",
+               f"Direct sources returning jobs: {direct}/{len(report)} companies",
                f"Alerts in last 24h: {len(st['alerts'])}"]
+        if fallback_names:
+            msg.append(f"Search-fallback only ({len(fallback_names)}): {E(', '.join(fallback_names)[:700])}")
         if seeded:
-            msg.append(f"Newly indexed (silent): {E(', '.join(seeded)[:600])}")
+            msg.append(f"First-time indexing: {len(seeded)} sources (existing jobs recorded silently)")
         msg += [f"⚠️ {E(w)}" for w in warnings]
         if tg_post("\n".join(msg)):
             st["last_hb"] = now
