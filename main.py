@@ -22,7 +22,7 @@ import re
 import sys
 import time
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 import requests
 
@@ -39,6 +39,7 @@ WORKERS = 8
 DETAIL_CAP = 150          # max job-detail fetches per run (rest are retried next run)
 AGG_BUDGET = int(os.getenv("AGG_BUDGET", "6"))   # JobSpy queries per run
 DISABLE_AGG = os.getenv("DISABLE_AGGREGATOR") == "1"
+LOOKBACK_HOURS = int(os.getenv("LOOKBACK_HOURS", "24"))   # only send jobs posted within this window (0 = off)
 DIGEST_THRESHOLD = 10     # more alerts than this in one run -> grouped digest messages
 FAIL_ALERT_AFTER = 6      # consecutive failed runs of a working source before a warning
 HEARTBEAT_HOURS = 24
@@ -234,10 +235,81 @@ def dig(obj, path, default=""):
     return obj
 
 
-def mk(raw_id, title, location, url, source, description="", desc_fn=None, trusted_loc=False, company=""):
+IST = timezone(timedelta(hours=5, minutes=30))
+
+
+def _ist_midnight(d):
+    return datetime(d.year, d.month, d.day, tzinfo=IST)
+
+
+def parse_posted(v):
+    """Any posting-date format -> (aware datetime | None, precise). precise=False means date-only."""
+    try:
+        if v is None or isinstance(v, bool) or v != v or v == "":
+            return None, False
+        if isinstance(v, (int, float)):
+            return datetime.fromtimestamp(v / 1000 if v > 1e11 else v, timezone.utc), True
+        if isinstance(v, datetime):
+            return (v if v.tzinfo else v.replace(tzinfo=timezone.utc)), True
+        if not isinstance(v, str) and hasattr(v, "year") and hasattr(v, "month"):   # datetime.date
+            return _ist_midnight(v), False
+        s = re.sub(r"\s+", " ", str(v)).strip()
+        low, today = s.lower(), datetime.now(IST).date()
+        if "posted today" in low or low == "today" or "just posted" in low:
+            return _ist_midnight(today), False
+        if "yesterday" in low:
+            return _ist_midnight(today - timedelta(days=1)), False
+        m = re.search(r"(\d+)\+?\s*days?\s*ago", low)
+        if m:
+            return _ist_midnight(today - timedelta(days=int(m.group(1)))), False
+        if re.fullmatch(r"\d{9,13}", s):
+            return parse_posted(int(s))
+        try:
+            dt = datetime.fromisoformat(s.replace("Z", "+00:00"))
+            if len(s) > 10:
+                return (dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)), True
+            return _ist_midnight(dt), False
+        except ValueError:
+            pass
+        for fmt in ("%B %d, %Y", "%b %d, %Y", "%d %B %Y", "%d %b %Y", "%Y/%m/%d", "%d/%m/%Y"):
+            try:
+                return _ist_midnight(datetime.strptime(s, fmt)), False
+            except ValueError:
+                continue
+    except Exception:  # noqa: BLE001
+        pass
+    return None, False
+
+
+def recency(job):
+    """True = posted inside the look-back window, False = provably older, None = date unknown."""
+    p = job.get("posted")
+    if LOOKBACK_HOURS <= 0 or p is None:
+        return None
+    now = datetime.now(timezone.utc)
+    if job.get("posted_precise"):
+        return (now - p).total_seconds() <= LOOKBACK_HOURS * 3600
+    return p.astimezone(IST).date() >= (now - timedelta(hours=LOOKBACK_HOURS)).astimezone(IST).date()
+
+
+def posted_label(job):
+    p = job.get("posted")
+    if p is None:
+        return ""
+    now = datetime.now(timezone.utc)
+    if job.get("posted_precise"):
+        h = (now - p).total_seconds() / 3600
+        return "Posted just now" if h < 1 else f"Posted {int(h)}h ago"
+    d = (now.astimezone(IST).date() - p.astimezone(IST).date()).days
+    return "Posted today" if d <= 0 else "Posted yesterday" if d == 1 else f"Posted {d} days ago"
+
+
+def mk(raw_id, title, location, url, source, description="", desc_fn=None, trusted_loc=False, company="", posted=None):
+    p, precise = parse_posted(posted)
     return {"raw_id": str(raw_id), "title": clean(title).strip(), "location": clean(location).strip(),
             "url": clean(url).strip(), "source": source, "description": clean_text(description),
-            "desc_fn": desc_fn, "trusted_loc": trusted_loc, "company": company, "id": ""}
+            "desc_fn": desc_fn, "trusted_loc": trusted_loc, "company": company, "id": "",
+            "posted": p, "posted_precise": precise}
 
 
 def http(method, url, **kw):
@@ -266,9 +338,10 @@ def a_greenhouse(slug):
 
     def detail(jid):
         j = http("GET", f"https://boards-api.greenhouse.io/v1/boards/{slug}/jobs/{jid}").json()
-        return {"description": clean_text(j.get("content"))}
+        return {"description": clean_text(j.get("content")), "posted": j.get("first_published")}
     return [mk(j["id"], j.get("title"), (j.get("location") or {}).get("name"), j.get("absolute_url"),
-               "Greenhouse", desc_fn=(lambda jid=j["id"]: detail(jid))) for j in d.get("jobs", [])]
+               "Greenhouse", desc_fn=(lambda jid=j["id"]: detail(jid)),
+               posted=j.get("first_published") or j.get("updated_at")) for j in d.get("jobs", [])]
 
 
 def a_lever(slug):
@@ -278,14 +351,14 @@ def a_lever(slug):
         lists = " ".join(f"{x.get('text', '')} {clean_text(x.get('content'))}" for x in (j.get("lists") or []))
         desc = f"{j.get('descriptionPlain', '')} {lists} {j.get('additionalPlain', '')}"
         out.append(mk(j["id"], j.get("text"), (j.get("categories") or {}).get("location"),
-                      j.get("hostedUrl"), "Lever", desc))
+                      j.get("hostedUrl"), "Lever", desc, posted=j.get("createdAt")))
     return out
 
 
 def a_ashby(slug):
     d = http("GET", f"https://api.ashbyhq.com/posting-api/job-board/{slug}").json()
     return [mk(j["id"], j.get("title"), j.get("location"), j.get("jobUrl") or j.get("applyUrl"), "Ashby",
-               j.get("descriptionPlain") or j.get("descriptionHtml"))
+               j.get("descriptionPlain") or j.get("descriptionHtml"), posted=j.get("publishedAt"))
             for j in d.get("jobs", []) if j.get("isListed", True)]
 
 
@@ -305,7 +378,8 @@ def a_smartrecruiters(slug):
                 secs = (a.get("jobAd") or {}).get("sections") or {}
                 return {"description": clean_text(" ".join(str((v or {}).get("text", "")) for v in secs.values()))}
             out.append(mk(j["id"], j.get("name"), ", ".join(x for x in (loc.get("city"), loc.get("country")) if x),
-                          f"https://jobs.smartrecruiters.com/{slug}/{j['id']}", "SmartRecruiters", desc_fn=detail))
+                          f"https://jobs.smartrecruiters.com/{slug}/{j['id']}", "SmartRecruiters", desc_fn=detail,
+                          posted=j.get("releasedDate")))
         offset += 100
         if len(items) < 100:
             break
@@ -352,7 +426,7 @@ def a_workday(tenant, wd, site):
                 locs = " ".join([str(x.get("location", ""))] + [str(l) for l in x.get("additionalLocations", [])])
                 return {"description": clean_text(x.get("jobDescription")), "location": locs}
             out.append(mk(path, p.get("title"), p.get("locationsText"), f"{base}/{site}{path}", "Workday",
-                          desc_fn=detail, trusted_loc=bool(facets)))
+                          desc_fn=detail, trusted_loc=bool(facets), posted=p.get("postedOn")))
         offset += 20
         if offset >= total:
             break
@@ -372,7 +446,8 @@ def a_amazon():
             desc = f"{j.get('basic_qualifications', '')} {j.get('description', '')} {j.get('preferred_qualifications', '')}"
             out.append(mk(j.get("id_icims") or j.get("id"), j.get("title"),
                           j.get("normalized_location") or j.get("location"),
-                          "https://www.amazon.jobs" + str(j.get("job_path", "")), "Amazon Careers", desc))
+                          "https://www.amazon.jobs" + str(j.get("job_path", "")), "Amazon Careers", desc,
+                          posted=j.get("posted_date")))
         if len(jobs) < 100:
             break
     return out
@@ -420,7 +495,8 @@ def a_eightfold(host, domain, query="software engineer", location="Bengaluru"):
                         x = http("GET", f"https://{host}/api/apply/v2/jobs/{pid}", params={"domain": domain}).json()
                         return {"description": clean_text(x.get("job_description"))}
                     out.append(mk(pid, j.get("name") or j.get("title"), locs, url, "Eightfold",
-                                  j.get("job_description") or "", desc_fn=detail))
+                                  j.get("job_description") or "", desc_fn=detail,
+                                  posted=j.get("t_create") or j.get("postedTs")))
                 if len(items) < 25:
                     break
             if out:
@@ -447,7 +523,8 @@ def a_microsoft():
                 locs = (j.get("properties") or {}).get("locations") or []
                 out.append(mk(j["jobId"], j.get("title"), "; ".join(locs),
                               f"https://jobs.careers.microsoft.com/global/en/job/{j['jobId']}",
-                              "Microsoft Careers", (j.get("properties") or {}).get("description")))
+                              "Microsoft Careers", (j.get("properties") or {}).get("description"),
+                              posted=j.get("postingDate") or (j.get("properties") or {}).get("postingDate")))
         return out
 
 
@@ -472,7 +549,7 @@ def a_oracle(host, site):
                                                   f"{it.get('ExternalQualificationsStr', '')}")}
             out.append(mk(rid, r.get("Title"), r.get("PrimaryLocation"),
                           f"https://{host}/hcmUI/CandidateExperience/en/sites/{site}/job/{rid}",
-                          "Oracle HCM", desc_fn=detail))
+                          "Oracle HCM", desc_fn=detail, posted=r.get("PostedDate")))
         if len(reqs) < 25:
             break
     return out
@@ -492,7 +569,7 @@ def a_uber():
             locs = j.get("allLocations") or ([j.get("location")] if j.get("location") else [])
             loc = "; ".join(f"{x.get('city', '')}, {x.get('countryName') or x.get('country', '')}" for x in locs)
             out.append(mk(j["id"], j.get("title"), loc, f"https://www.uber.com/global/en/careers/list/{j['id']}/",
-                          "Uber Careers", j.get("description")))
+                          "Uber Careers", j.get("description"), posted=j.get("creationDate")))
         if len(res) < 50:
             break
     return out
@@ -725,7 +802,7 @@ def agg_search(term, company=None):
             continue
         j = mk("agg_" + hashlib.sha1(url.encode()).hexdigest()[:16], row.get("title"), row.get("location"), url,
                clean(row.get("site")).title() or "JobSpy", clean(row.get("description")),
-               company=company["name"] if company else canon(comp))
+               company=company["name"] if company else canon(comp), posted=row.get("date_posted"))
         out.append(j)
     return out
 
@@ -780,6 +857,8 @@ def fmt_alert(a):
     lines = ["🚨 <b>NEW OPENING</b>", "",
              f"🏢 <b>{E(j['company'])}</b>" + (f"  ·  {FIT_ICON[meta['fit']]}" if meta.get("fit") in FIT_ICON else ""),
              f"💼 {E(j['title'])}", f"📍 {E(j['location'] or 'Not specified')}"]
+    if posted_label(j):
+        lines.append(f"🕒 {E(posted_label(j))}")
     bits = ([f"Exp {info['exp']}"] if info.get("exp") else []) + ([", ".join(info["tags"]) + " in JD"] if info.get("tags") else [])
     if bits:
         lines.append("🧾 " + " · ".join(E(b) for b in bits))
@@ -805,6 +884,27 @@ def send_digest(alerts):
     chunks.append(cur)
     results = [tg_post(c) for c in chunks]
     return all(results)
+
+
+def triage(cand, st, seeding):
+    """Which candidates still need evaluating/alerting; everything else is marked seen.
+    seeding (first sight of a source): only jobs posted inside the look-back window stay eligible,
+        older ones are recorded silently. Jobs with an unknown date are recorded silently.
+    normal run: any unseen job is eligible unless its date proves it is older than the window."""
+    todo = []
+    for j in cand:
+        r = recency(j)
+        if seeding:
+            if r is True:
+                todo.append(j)
+            else:
+                st["seen"].add(j["id"])
+        elif j["id"] not in st["seen"]:
+            if r is False:
+                st["seen"].add(j["id"])
+            else:
+                todo.append(j)
+    return todo
 
 
 # ===================================================================== main
@@ -851,12 +951,11 @@ def main():
         if check:
             pending += [(c, j) for j in cand[:10]]
             continue
-        if name not in st["sources"]:        # first sight: index silently, never flood
-            st["seen"].update(j["id"] for j in cand)
+        seeding = name not in st["sources"]
+        pending += [(c, j) for j in triage(cand, st, seeding)]
+        if seeding:
             st["sources"].add(name)
             seeded.append(name)
-            continue
-        pending += [(c, j) for j in cand if j["id"] not in st["seen"]]
 
     # ---- B. fetch descriptions only for new candidates
     need = [j for _, j in pending if j["desc_fn"] and not j["description"]]
@@ -871,12 +970,17 @@ def main():
     with ThreadPoolExecutor(WORKERS) as pool:
         for j, res in zip(need[:DETAIL_CAP], pool.map(get_detail, need[:DETAIL_CAP])):
             j["description"] = res.get("description", "") or j["description"]
+            if res.get("posted"):
+                j["posted"], j["posted_precise"] = parse_posted(res["posted"])
             if res.get("location") is not None and not j["trusted_loc"]:
                 j["location"] = f"{j['location']} {res['location']}".strip()
 
     alerts, evaluated_ids = [], []
     for c, j in pending:
         if id(j) in deferred:
+            continue
+        if recency(j) is False:              # the detail call revealed it is older than the window
+            evaluated_ids.append(j["id"])
             continue
         ok, info = evaluate(j)
         evaluated_ids.append(j["id"])
@@ -906,18 +1010,15 @@ def main():
             if check:
                 alerts += [{"job": j, "info": i, "origin": "agg"} for j in cand for ok, i in [evaluate(j)] if ok]
                 continue
-            if key not in st["sources"]:
-                st["seen"].update(j["id"] for j in cand)
-                st["sources"].add(key)
-                seeded.append(f"search: {term}")
-                continue
-            for j in cand:
-                if j["id"] in st["seen"]:
-                    continue
+            seeding = key not in st["sources"]
+            for j in triage(cand, st, seeding):
                 ok, info = evaluate(j)
                 evaluated_ids.append(j["id"])
                 if ok and fp_of(j) not in st["fps"]:
                     alerts.append({"job": j, "info": info, "origin": "agg"})
+            if seeding:
+                st["sources"].add(key)
+                seeded.append(f"search: {term}")
 
     # ---- de-duplicate within this run (same job returned by several searches / by direct + search)
     uniq, ids, fps = [], set(), set()
@@ -932,13 +1033,18 @@ def main():
 
     # ---- check mode: report and exit
     if check:
-        print(f"\n{'COMPANY':24} {'SOURCE':34} {'JOBS':>5} {'BLR+ROLE':>9}  SAMPLE ACCEPTED")
+        print(f"\n{'COMPANY':24} {'SOURCE':34} {'JOBS':>5} {'BLR+ROLE':>9} {'LAST'+str(LOOKBACK_HOURS)+'H':>7} {'NODATE':>7}  SAMPLE ACCEPTED")
         acc_by = {}
         for a in alerts:
             acc_by.setdefault(a["job"]["company"], []).append(a["job"]["title"])
-        for name, src, err, n, p, _ in report:
+        tot24 = 0
+        for name, src, err, n, p, cands in report:
+            r24 = sum(1 for j in cands if recency(j) is True)
+            nod = sum(1 for j in cands if recency(j) is None)
+            tot24 += r24
             sample = " | ".join(acc_by.get(name, [])[:2])
-            print(f"{name[:24]:24} {src[:34]:34} {n:>5} {p:>9}  {sample[:70]}" + (f"   [{err[:70]}]" if err else ""))
+            print(f"{name[:24]:24} {src[:34]:34} {n:>5} {p:>9} {r24:>7} {nod:>7}  {sample[:60]}" + (f"   [{err[:70]}]" if err else ""))
+        print(f"\nBengaluru+role jobs posted in the last {LOOKBACK_HOURS}h across direct sources: {tot24}  (these are what the first run will send)")
         direct = sum(1 for r in report if r[1] != "FALLBACK")
         print(f"\nDirect: {direct}/{len(report)} companies | fallback-only: {len(report) - direct}")
         for t, r in agg_report:
@@ -976,7 +1082,7 @@ def main():
         if fallback_names:
             msg.append(f"Search-fallback only ({len(fallback_names)}): {E(', '.join(fallback_names)[:700])}")
         if seeded:
-            msg.append(f"First-time indexing: {len(seeded)} sources (existing jobs recorded silently)")
+            msg.append(f"First-time indexing: {len(seeded)} sources (jobs older than {LOOKBACK_HOURS}h recorded silently; newer ones were alerted)")
         msg += [f"⚠️ {E(w)}" for w in warnings]
         if tg_post("\n".join(msg)):
             st["last_hb"] = now
