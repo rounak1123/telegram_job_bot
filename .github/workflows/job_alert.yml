@@ -40,7 +40,8 @@ jobs:
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          AGG_BUDGET: '12'   # search-fallback queries per run (6 is enough for hourly runs)
+          AGG_BUDGET: '12'     # search-fallback queries per run (6 is enough for hourly runs)
+          LOOKBACK_HOURS: '24' # send jobs posted within this many hours that were not sent yet (0 = off)
           MODE: ${{ github.event.inputs.mode }}
         run: |
           set -o pipefail
