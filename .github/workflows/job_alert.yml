@@ -3,13 +3,19 @@ name: 4-Hour Job Tracker
 on:
   schedule:
     - cron: '0 */4 * * *'   # every 4 hours. Hourly alternative: '7 * * * *' with AGG_BUDGET '6'
-  workflow_dispatch:         # manual trigger button for testing
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'run = normal | check = test every source, send nothing | check-agg = also test search fallback'
+        type: choice
+        options: [run, check, check-agg]
+        default: run
 
 permissions:
   contents: write            # required so the bot can push seen_jobs.json (default token is read-only)
 
 concurrency:
-  group: job-tracker         # never let a manual run overlap a scheduled one
+  group: job-tracker
   cancel-in-progress: false
 
 jobs:
@@ -35,9 +41,18 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           AGG_BUDGET: '12'   # search-fallback queries per run (6 is enough for hourly runs)
-        run: python main.py
+          MODE: ${{ github.event.inputs.mode }}
+        run: |
+          set -o pipefail
+          case "$MODE" in
+            check)     python main.py --check     2>&1 | tee report.txt ;;
+            check-agg) python main.py --check-agg 2>&1 | tee report.txt ;;
+            *)         python main.py ;;
+          esac
+          if [ -f report.txt ]; then { echo '```'; cat report.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"; fi
 
       - name: Commit and Push Updated State
+        if: ${{ github.event.inputs.mode != 'check' && github.event.inputs.mode != 'check-agg' }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
