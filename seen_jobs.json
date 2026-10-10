@@ -24,6 +24,7 @@
   "agg_59deb06c6a6c27d1",
   "agg_5e9a81b3a293d195",
   "agg_5f4ce1bf48d5628e",
+  "agg_60397b09b9de5a91",
   "agg_6bc30f4d3f738e8c",
   "agg_6cd6e81b11aa3141",
   "agg_73cd4711431d1dda",
@@ -282,6 +283,7 @@
   "nvidia|/job/India-Pune/Senior-Systems-Software-Engineer_JR2021126",
   "nvidia|/job/India-Pune/System-Software-Engineer---GPU-Profiling_JR2020625",
   "nvidia|/job/India-Remote/Senior-Systems-Software-Engineer---NV-Cloud-Functions_JR2025225",
+  "oracle|346903",
   "oracle|346911",
   "paytm|fffdcfb1-fd6e-4401-b059-500838a6db0e",
   "rubrik|7849713",
@@ -613,10 +615,9 @@
   "virtusa|java|blr"
  ],
  "cfg": "97687c30913b",
- "agg_cursor": 28,
+ "agg_cursor": 40,
  "last_hb": 1791606224.4227145,
  "alerts": [
-  1791587163.0567546,
   1791606224.4227145,
   1791606224.4227145,
   1791606224.4227145,
