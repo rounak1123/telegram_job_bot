@@ -9,6 +9,7 @@
   "agg_24249de77961035f",
   "agg_2c2507ababd61afb",
   "agg_2c5c78e73cad420e",
+  "agg_2cdaf0c621e2c0a3",
   "agg_2e22e0749cd895b1",
   "agg_3027cb21c685d8d6",
   "agg_30e8b9b99649249a",
@@ -635,7 +636,7 @@
   "virtusa|java|blr"
  ],
  "cfg": "97687c30913b",
- "agg_cursor": 32,
+ "agg_cursor": 0,
  "last_hb": 1791729603.7535188,
  "alerts": [
   1791691425.1062193,
