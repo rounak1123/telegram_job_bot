@@ -39,6 +39,7 @@
   "agg_93ec61f8c6299e02",
   "agg_93f687bd71847044",
   "agg_951a7fdf5bc738b4",
+  "agg_987268761612247c",
   "agg_98802b1bac9c2851",
   "agg_9aa57008cc2aadb7",
   "agg_9ad81a70c8001774",
@@ -285,6 +286,7 @@
   "nvidia|/job/India-Bengaluru/Senior-System-Software-Engineer_JR2011238-1",
   "nvidia|/job/India-Bengaluru/Senior-System-Software-Engineer_JR2021723",
   "nvidia|/job/India-Bengaluru/Senior-System-Software-Safety-Engineer----Halos-Core-and-Robotics-Platform_JR2023363-1",
+  "nvidia|/job/India-Bengaluru/Senior-Systems-Software-Engineer--CUDA-Driver_JR2027290",
   "nvidia|/job/India-Bengaluru/System-Software-Engineer--GPU-Development-Tools_JR2022682",
   "nvidia|/job/India-Bengaluru/Systems-Software-Engineer--CPU-Manageability-Stack_JR2023337",
   "nvidia|/job/India-Hyderabad/Senior-System-Software-Engineer---Boot-SW-Engineer_JR2023304",
@@ -633,7 +635,7 @@
   "virtusa|java|blr"
  ],
  "cfg": "97687c30913b",
- "agg_cursor": 20,
+ "agg_cursor": 32,
  "last_hb": 1791729603.7535188,
  "alerts": [
   1791691425.1062193,
