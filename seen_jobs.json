@@ -2,6 +2,8 @@
  "v": 4,
  "seen": [
   "agg_00f9c6796d07d7ba",
+  "agg_02bbb06b1fa1a89d",
+  "agg_05217e763397ea16",
   "agg_07811c1398357f10",
   "agg_09aace7d1127a1b5",
   "agg_0a4bdffefdb1a2a0",
@@ -79,6 +81,7 @@
   "agg_98802b1bac9c2851",
   "agg_9aa57008cc2aadb7",
   "agg_9ad81a70c8001774",
+  "agg_9b8f8e28a213fefa",
   "agg_9e9721cb80322e7d",
   "agg_a0a2af516d87ae33",
   "agg_a4fd67d3e1a13fcc",
@@ -89,8 +92,10 @@
   "agg_b48acdbf83ca1041",
   "agg_b747a14190a8dd90",
   "agg_b7c1c559e0a78191",
+  "agg_b9a2218f022f234f",
   "agg_be5d8d6dc0216929",
   "agg_c07e11a7161b7bb1",
+  "agg_c3087d7eb55fdb76",
   "agg_c4d2530f67d95c22",
   "agg_c8c555a8a582da2f",
   "agg_c93a4941c176b782",
@@ -118,6 +123,7 @@
   "agg_f54bec81bf4a01bf",
   "agg_f6193a2a63374d63",
   "agg_f94dc60390dbbc44",
+  "agg_f95c2d4bc9d9e521",
   "agg_fd21b47eec98830a",
   "agg_fd7d7324ac8316a8",
   "agg_fe374ab379b2bd60",
@@ -715,6 +721,10 @@
   "amazon|softwaredevengineer2euintechpartnergrowthexperience|blr",
   "americanexpress|softwareengineer2|blr",
   "capco|javabackenddeveloper|blr",
+  "cisco|softwareengineer24yearsainativepythongolangjava|blr",
+  "cisco|softwareengineerbackendpythongodistributedsystemscloud4years|blr",
+  "cisco|softwareengineergojavadockerskubernetesaws|blr",
+  "cisco|softwareengineerjava20springreactspringboot48yrsexpbangalore|blr",
   "cisco|softwareengineerjavagolangpython2to4yearsbangalore|blr",
   "cisco|softwareengineerjavagolangpythoncc2to4yearsbangalore|blr",
   "client|backendengineerplatform|blr",
@@ -750,7 +760,7 @@
   "wellsfargo|seniorspecialtysoftwareengineerfullstackdeveloper|blr"
  ],
  "cfg": "97687c30913b",
- "agg_cursor": 16,
+ "agg_cursor": 28,
  "last_hb": 1791917693.7942958,
  "alerts": [
   1791856258.8528798,
@@ -774,6 +784,10 @@
   1791917693.7942958,
   1791917693.7942958,
   1791917693.7942958,
-  1791917693.7942958
+  1791917693.7942958,
+  1791934673.680038,
+  1791934673.680038,
+  1791934673.680038,
+  1791934673.680038
  ]
 }
