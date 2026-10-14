@@ -58,6 +58,7 @@
   "agg_60397b09b9de5a91",
   "agg_62463f07f2401cfc",
   "agg_6395ac8628fe1973",
+  "agg_6649a3b8557d0fc5",
   "agg_673f4697b4f3c26c",
   "agg_6b9e2b86bbc2cb19",
   "agg_6bc30f4d3f738e8c",
@@ -69,6 +70,7 @@
   "agg_79c97c85a330358a",
   "agg_7a208d3e68082bf8",
   "agg_834b20f426871fae",
+  "agg_835f29b4c9969e3d",
   "agg_8393fdf4ce4b4291",
   "agg_87ff8865e09e8bd8",
   "agg_88bea4a5494c7678",
@@ -258,6 +260,7 @@
   "amazon|10575464",
   "amazon|10575929",
   "amazon|10576078",
+  "amazon|10578193",
   "amazon|3120411",
   "amazon|3151381",
   "amazon|3156875",
@@ -737,6 +740,7 @@
   "navan|softwareengineer2|blr",
   "navi|sde2backend|blr",
   "nomialtd|backendengineer|blr",
+  "nutanix|mts3javagolang|blr",
   "outnovate|backenddeveloper|blr",
   "paypal|srsoftwareengineer|blr",
   "persistentsystems|javasoftwareengineer|blr",
@@ -760,11 +764,9 @@
   "wellsfargo|seniorspecialtysoftwareengineerfullstackdeveloper|blr"
  ],
  "cfg": "97687c30913b",
- "agg_cursor": 28,
+ "agg_cursor": 40,
  "last_hb": 1791917693.7942958,
  "alerts": [
-  1791856258.8528798,
-  1791856258.8528798,
   1791890831.703591,
   1791890831.703591,
   1791890831.703591,
@@ -788,6 +790,7 @@
   1791934673.680038,
   1791934673.680038,
   1791934673.680038,
-  1791934673.680038
+  1791934673.680038,
+  1791948920.5684898
  ]
 }
