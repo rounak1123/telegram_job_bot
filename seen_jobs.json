@@ -65,6 +65,7 @@
   "agg_51ffce40b327851a",
   "agg_522063194a895173",
   "agg_526f3dee70ea086f",
+  "agg_55225ed919afc063",
   "agg_552baf07588f22f4",
   "agg_5635dd3118c2f56e",
   "agg_59deb06c6a6c27d1",
@@ -86,6 +87,7 @@
   "agg_701fcb19be64d104",
   "agg_72197fb2a96341dc",
   "agg_73cd4711431d1dda",
+  "agg_746533a936597334",
   "agg_79c97c85a330358a",
   "agg_7a208d3e68082bf8",
   "agg_834b20f426871fae",
@@ -128,6 +130,7 @@
   "agg_c96fe871d2c2233d",
   "agg_cbd96d7263f54460",
   "agg_cbf50186b8e53d20",
+  "agg_cda16b67bf1bb882",
   "agg_cdb2c267b8bd2c08",
   "agg_ce36ec06336454c0",
   "agg_cf1d7cc43f4d4808",
@@ -806,6 +809,7 @@
   "navi|sde2backend|blr",
   "nomialtd|backendengineer|blr",
   "nutanix|mts3javagolang|blr",
+  "nutanix|systemsreliabilityengineer2|blr",
   "outnovate|backenddeveloper|blr",
   "paypal|srsoftwareengineer|blr",
   "persistentsystems|javasoftwareengineer|blr",
@@ -835,8 +839,8 @@
   "youtrip|softwareengineer2backend|blr"
  ],
  "cfg": "97687c30913b",
- "agg_cursor": 24,
- "last_hb": 1792018850.8773108,
+ "agg_cursor": 36,
+ "last_hb": 1792104948.304103,
  "alerts": [
   1792054403.50534,
   1792054403.50534,
@@ -846,6 +850,7 @@
   1792054403.50534,
   1792054403.50534,
   1792081276.0955656,
-  1792081276.0955656
+  1792081276.0955656,
+  1792104948.304103
  ]
 }
