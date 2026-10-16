@@ -463,6 +463,7 @@
   "salesforce|/job/India---Hyderabad/Software-Engineering--Mulesoft--MTS-SMTS_JR364389",
   "salesforce|/job/India---Hyderabad/Software-Engineering-SMTS---MTS----Platform-Engineering--Backend--Kubernetes---Cloud-_JR347341",
   "stripe|7543868",
+  "stripe|7618977",
   "stripe|8209970",
   "target|/job/BangaloreIndia/Senior-Engineer---Backend-data_R0000451881",
   "target|/job/Tower-02-Manyata-Embassy-Business-Park-Racenahali--Nagawara-Villages-Outer-Ring-Rd-Bangalore-540065/Lead-Engineer--Backend_R0000387028",
@@ -857,7 +858,7 @@
   "youtrip|softwareengineer2backend|blr"
  ],
  "cfg": "97687c30913b",
- "agg_cursor": 4,
+ "agg_cursor": 16,
  "last_hb": 1792104948.304103,
  "alerts": [
   1792054403.50534,
