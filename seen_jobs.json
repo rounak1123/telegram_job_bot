@@ -93,6 +93,7 @@
   "agg_60397b09b9de5a91",
   "agg_62463f07f2401cfc",
   "agg_6395ac8628fe1973",
+  "agg_664565626ed82444",
   "agg_6649a3b8557d0fc5",
   "agg_66fdd47e259ca915",
   "agg_673f4697b4f3c26c",
@@ -126,6 +127,7 @@
   "agg_9194861413ed3ad5",
   "agg_93ec61f8c6299e02",
   "agg_93f687bd71847044",
+  "agg_94faba42a68ef4d1",
   "agg_951a7fdf5bc738b4",
   "agg_987268761612247c",
   "agg_98802b1bac9c2851",
@@ -139,6 +141,7 @@
   "agg_a4fd67d3e1a13fcc",
   "agg_a74c5673809d1ecc",
   "agg_a93057c0877fa49c",
+  "agg_aab1376a46dbecfe",
   "agg_ab467f83658e1155",
   "agg_abe17beffc7ebc93",
   "agg_adc9cb11f32ccdb0",
@@ -158,6 +161,7 @@
   "agg_c3087d7eb55fdb76",
   "agg_c4ac090fad898fa9",
   "agg_c4d2530f67d95c22",
+  "agg_c5f727c95896ab20",
   "agg_c8c555a8a582da2f",
   "agg_c93a4941c176b782",
   "agg_c9446131f492393b",
@@ -188,6 +192,7 @@
   "agg_e160b119ff78eb89",
   "agg_e191d8f4e0499bfc",
   "agg_e196fbaa25500249",
+  "agg_e3acd26d36c92922",
   "agg_e43ff73f751eab5e",
   "agg_e488a3f3bd2c4bb0",
   "agg_e51a5ae34787ae56",
@@ -870,6 +875,7 @@
   "microsoft|softwareengineer|blr",
   "navan|softwareengineer2|blr",
   "navi|sde2backend|blr",
+  "netapp|mgrsoftwareengineerjavapythonclouddistributed|blr",
   "netapp|softwareengineerclouddistributedjavapython|blr",
   "netapp|softwareengineergoccpythonjavakubernetesmicroservices|blr",
   "nomialtd|backendengineer|blr",
@@ -911,10 +917,9 @@
   "zinier|sde2javajeebackendfullstackdevelopment|blr"
  ],
  "cfg": "97687c30913b",
- "agg_cursor": 31,
+ "agg_cursor": 43,
  "last_hb": 1792225053.2964144,
  "alerts": [
-  1792166843.7168577,
   1792190024.4300382,
   1792190024.4300382,
   1792190024.4300382,
@@ -926,6 +931,7 @@
   1792206149.319099,
   1792206149.319099,
   1792206149.319099,
-  1792206149.319099
+  1792206149.319099,
+  1792260706.733146
  ]
 }
