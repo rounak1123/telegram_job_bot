@@ -147,6 +147,7 @@
   "agg_951a7fdf5bc738b4",
   "agg_987268761612247c",
   "agg_98802b1bac9c2851",
+  "agg_99ca47a70e4dcaac",
   "agg_9aa57008cc2aadb7",
   "agg_9ad81a70c8001774",
   "agg_9b67c41896ffb251",
@@ -470,6 +471,7 @@
   "microsoft|1970393557026313",
   "microsoft|1970393557026347",
   "microsoft|1970393557026657",
+  "microsoft|1970393557037663",
   "microsoft|1970393557038608",
   "microsoft|1970393557039184",
   "nvidia|/job/India-Bengaluru/Senior-Compute-System-Software-Engineer_JR2025828",
@@ -951,10 +953,9 @@
   "zinier|sde2javajeebackendfullstackdevelopment|blr"
  ],
  "cfg": "97687c30913b",
- "agg_cursor": 15,
+ "agg_cursor": 27,
  "last_hb": 1792312484.2906358,
  "alerts": [
-  1792274412.9203682,
   1792337110.5827818,
   1792337110.5827818,
   1792337110.5827818,
