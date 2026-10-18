@@ -131,6 +131,7 @@
   "agg_835f29b4c9969e3d",
   "agg_8393fdf4ce4b4291",
   "agg_852591bf10aa4ef2",
+  "agg_86265c0c25305d95",
   "agg_87d7ee1c4e9a2300",
   "agg_87ff8865e09e8bd8",
   "agg_88bea4a5494c7678",
@@ -908,6 +909,7 @@
   "netapp|softwareengineerclouddistributedjavapython|blr",
   "netapp|softwareengineergoccpythonjavakubernetesmicroservices|blr",
   "nomialtd|backendengineer|blr",
+  "northerntrust|javadeveloperfrauddomain|blr",
   "nutanix|mts3javagolang|blr",
   "nutanix|systemsreliabilityengineer2blr|blr",
   "nutanix|systemsreliabilityengineer2|blr",
@@ -949,15 +951,15 @@
   "zinier|sde2javajeebackendfullstackdevelopment|blr"
  ],
  "cfg": "97687c30913b",
- "agg_cursor": 3,
+ "agg_cursor": 15,
  "last_hb": 1792312484.2906358,
  "alerts": [
-  1792260706.733146,
   1792274412.9203682,
   1792337110.5827818,
   1792337110.5827818,
   1792337110.5827818,
   1792337110.5827818,
-  1792337110.5827818
+  1792337110.5827818,
+  1792348172.0160232
  ]
 }
