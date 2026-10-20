@@ -38,6 +38,7 @@
   "agg_24249de77961035f",
   "agg_24e65d281bd7a4d7",
   "agg_24e8c401ea7eafed",
+  "agg_24f875b5825cd8c4",
   "agg_26a31ca81e7ad337",
   "agg_278b7737b50718dc",
   "agg_27a57f2c0b728097",
@@ -990,10 +991,9 @@
   "zinier|sde2javajeebackendfullstackdevelopment|blr"
  ],
  "cfg": "97687c30913b",
- "agg_cursor": 30,
+ "agg_cursor": 42,
  "last_hb": 1792402694.8025224,
  "alerts": [
-  1792379930.2960303,
   1792402694.8025224,
   1792402694.8025224,
   1792402694.8025224,
