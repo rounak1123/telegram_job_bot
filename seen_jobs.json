@@ -112,6 +112,7 @@
   "agg_561cb62b3c566573",
   "agg_5635dd3118c2f56e",
   "agg_56ab62d4db72c7a1",
+  "agg_573e800aaf56e1b6",
   "agg_57644a1131e8e2fa",
   "agg_5869dd2a2165604d",
   "agg_594d41e23332f8c0",
@@ -136,6 +137,7 @@
   "agg_6785ab7fc5a2d116",
   "agg_680e93a48e2a69c4",
   "agg_690b0b7e081c1d91",
+  "agg_69c7298330968368",
   "agg_6ad1daeb7fcb1ca9",
   "agg_6b769a3807456a53",
   "agg_6b9e2b86bbc2cb19",
@@ -218,6 +220,7 @@
   "agg_bb93276c977d10a1",
   "agg_bdc1abbf912439e2",
   "agg_be5d8d6dc0216929",
+  "agg_bf9f44996d3cd334",
   "agg_c07e11a7161b7bb1",
   "agg_c3087d7eb55fdb76",
   "agg_c4ac090fad898fa9",
@@ -280,6 +283,7 @@
   "agg_eddc1d305bc98bdf",
   "agg_eea9efbb8aa970b0",
   "agg_ef05abf056f1e075",
+  "agg_ef632a7a69c81056",
   "agg_efff63585d7d9486",
   "agg_f12e46dc5bc21ec4",
   "agg_f3f9adbb1d91f9fd",
@@ -920,7 +924,7 @@
   "Databricks": 0,
   "Stripe": 0,
   "Cred": 0,
-  "Microsoft": 1,
+  "Microsoft": 0,
   "VMware/Broadcom": 0,
   "Slice": 0,
   "Graviton Research": 0,
@@ -998,6 +1002,7 @@
   "nomialtd|backendengineer|blr",
   "northerntrust|javadeveloperfrauddomain|blr",
   "nutanix|mts3javagolang|blr",
+  "nutanix|mts3|blr",
   "nutanix|systemsreliabilityengineer2blr|blr",
   "nutanix|systemsreliabilityengineer2|blr",
   "oracle|platformsoftwareengineer2|blr",
@@ -1031,6 +1036,7 @@
   "tescobengaluru|softwaredevelopmentengineer2|blr",
   "tescotechnology|softwaredevelopmentengineer2|blr",
   "texasinstruments|javabackenddeveloper|blr",
+  "texasinstruments|javabackendengineerhospitalmanagementsystems|blr",
   "texasinstruments|javadevelopermsb|blr",
   "texasinstruments|javadeveloper|blr",
   "texasinstruments|urgentopeningforjavadeveloperwhocanjoinimmediately|blr",
@@ -1047,7 +1053,7 @@
   "zinier|sde2javajeebackendfullstackdevelopment|blr"
  ],
  "cfg": "97687c30913b",
- "agg_cursor": 26,
+ "agg_cursor": 38,
  "last_hb": 1792600799.3671389,
  "alerts": [
   1792552931.0248318,
@@ -1055,6 +1061,8 @@
   1792573760.3586037,
   1792573760.3586037,
   1792600799.3671389,
-  1792600799.3671389
+  1792600799.3671389,
+  1792623811.3188028,
+  1792623811.3188028
  ]
 }
