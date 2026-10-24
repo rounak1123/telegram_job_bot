@@ -90,6 +90,7 @@
   "agg_391adc66c51e9d86",
   "agg_392a5924e681bfba",
   "agg_3944c27a8c1e6323",
+  "agg_3976e996616ee1ba",
   "agg_39aa4131ff21a8e9",
   "agg_39f50e40b23a5dab",
   "agg_3a804501d3ba2f03",
@@ -156,6 +157,7 @@
   "agg_62ed444744e13be0",
   "agg_6381c08c475260cf",
   "agg_6395ac8628fe1973",
+  "agg_656d9b9b0eb870e0",
   "agg_664565626ed82444",
   "agg_6649a3b8557d0fc5",
   "agg_66fdd47e259ca915",
@@ -1185,6 +1187,7 @@
   "tataconsultancyservices|walkindrivejavadeveloperbengaluru|blr",
   "tescobengaluru|softwaredevelopmentengineer2|blr",
   "tescotechnology|softwaredevelopmentengineer2|blr",
+  "texasinstruments|javaaideveloper|blr",
   "texasinstruments|javabackenddeveloper|blr",
   "texasinstruments|javabackendengineerhospitalmanagementsystems|blr",
   "texasinstruments|javadevelopermsb|blr",
@@ -1210,14 +1213,9 @@
   "zinier|sde2javajeebackendfullstackdevelopment|blr"
  ],
  "cfg": "97687c30913b",
- "agg_cursor": 26,
+ "agg_cursor": 38,
  "last_hb": 1792796129.3964782,
  "alerts": [
-  1792746536.8670464,
-  1792746536.8670464,
-  1792746536.8670464,
-  1792746536.8670464,
-  1792746536.8670464,
   1792773032.0446622,
   1792796129.3964782,
   1792796129.3964782,
@@ -1226,6 +1224,7 @@
   1792796129.3964782,
   1792812043.526447,
   1792812043.526447,
-  1792812043.526447
+  1792812043.526447,
+  1792855529.1658528
  ]
 }
