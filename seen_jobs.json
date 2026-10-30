@@ -115,6 +115,7 @@
   "agg_35ba2dc5fcfbaa06",
   "agg_35cfde52db9d7043",
   "agg_3639e2ee869ad1c3",
+  "agg_3644431443304f19",
   "agg_3756eb90c43a1e9c",
   "agg_38222a762cd078ed",
   "agg_385c7094743a0794",
@@ -146,6 +147,7 @@
   "agg_413da26f825e7210",
   "agg_417364e12515602a",
   "agg_41ab629fa8c2b62c",
+  "agg_4222ad48521b0ad1",
   "agg_426d4b6dbba2a816",
   "agg_4307abc6311302ff",
   "agg_43442635ebc4bd23",
@@ -316,6 +318,7 @@
   "agg_9ad00bc95cdc1499",
   "agg_9ad81a70c8001774",
   "agg_9b67c41896ffb251",
+  "agg_9b6cf7326336b024",
   "agg_9b8f8e28a213fefa",
   "agg_9ce758e0fbd0105f",
   "agg_9e9721cb80322e7d",
@@ -385,6 +388,7 @@
   "agg_c4d2530f67d95c22",
   "agg_c50545b4473fe012",
   "agg_c5f727c95896ab20",
+  "agg_c627d1afbe9cafa2",
   "agg_c6ae4d9a1259b28f",
   "agg_c8c555a8a582da2f",
   "agg_c8cd1ee63fef660e",
@@ -669,6 +673,7 @@
   "amazon|10591021",
   "amazon|10592289",
   "amazon|10593265",
+  "amazon|10593661",
   "amazon|3120411",
   "amazon|3151381",
   "amazon|3156875",
@@ -922,6 +927,7 @@
   "oracle|348393",
   "oracle|348640",
   "oracle|348979",
+  "paypal|/job/Bangalore-Karnataka-India/Software-Engineer---Backend--Java-_R0138270-1",
   "paypal|/job/Bangalore-Karnataka-India/Software-Engineer_R0138283",
   "paypal|/job/Bangalore-Karnataka-India/Sr-Software-Engineer---Python_R0138315-1",
   "paypal|/job/Bangalore-Karnataka-India/Sr-Software-Engineer_R0137884",
@@ -1420,6 +1426,7 @@
   "oracle|platformsoftwareengineer2|blr",
   "outnovate|backenddeveloper|blr",
   "pacewisdomsolutions|javadeveloper|blr",
+  "paypal|softwareengineerbackendjava|blr",
   "paypal|srsoftwareengineer|blr",
   "persistentsystems|javabackenddeveloper|blr",
   "persistentsystems|javafullstackdeveloper|blr",
@@ -1490,11 +1497,9 @@
   "zinier|sde2javajeebackendfullstackdevelopment|blr"
  ],
  "cfg": "97687c30913b",
- "agg_cursor": 18,
+ "agg_cursor": 30,
  "last_hb": 1793334393.6947124,
  "alerts": [
-  1793285963.4594245,
-  1793285963.4594245,
   1793307342.7244558,
   1793307342.7244558,
   1793307342.7244558,
@@ -1505,6 +1510,7 @@
   1793334393.6947124,
   1793334393.6947124,
   1793371930.9736326,
-  1793371930.9736326
+  1793371930.9736326,
+  1793391975.1812475
  ]
 }
