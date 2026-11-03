@@ -308,6 +308,7 @@
   "agg_8393fdf4ce4b4291",
   "agg_8408a8f07b442da6",
   "agg_852591bf10aa4ef2",
+  "agg_85bf447fdc7a508b",
   "agg_85d0efa7fa8e93b1",
   "agg_86265c0c25305d95",
   "agg_86bf311c3ca5b3dc",
@@ -571,6 +572,7 @@
   "agg_fd7d7324ac8316a8",
   "agg_fe374ab379b2bd60",
   "agg_fe6bad08c521c6f8",
+  "agg_febec2f3288d229a",
   "agg_ff0e77c146873b6f",
   "agg_ff90a85aef5e8ad8",
   "amazon|10370961",
@@ -922,6 +924,7 @@
   "nvidia|/job/India-Hyderabad/Senior-System-Software-Engineer---Boot-SW-Engineer_JR2023304",
   "nvidia|/job/India-Hyderabad/Senior-System-Software-Engineer---GPU_JR2028568",
   "nvidia|/job/India-Pune/Senior-System-Software-Engineer---AI-SDK-Multimedia-platform_JR2027371-1",
+  "nvidia|/job/India-Pune/Senior-System-Software-Engineer---Accelerated-Microservices-and-Libraries_JR2029168",
   "nvidia|/job/India-Pune/Senior-System-Software-Engineer---GPU-Power-Management_JR2026350",
   "nvidia|/job/India-Pune/Senior-System-Software-Engineer---GPU-and-SOC_JR2026373",
   "nvidia|/job/India-Pune/Senior-System-Software-Engineer---Graphics_JR2026780",
@@ -1003,6 +1006,8 @@
   "oracle|348812",
   "oracle|348979",
   "oracle|349128",
+  "oracle|349258",
+  "oracle|349346",
   "paypal|/job/Bangalore-Karnataka-India/Software-Engineer---Backend--Java-_R0138270-1",
   "paypal|/job/Bangalore-Karnataka-India/Software-Engineer_R0138283",
   "paypal|/job/Bangalore-Karnataka-India/Sr-Software-Engineer---Python_R0138315-1",
@@ -1356,7 +1361,7 @@
   "Databricks": 0,
   "Stripe": 0,
   "Cred": 0,
-  "Microsoft": 0,
+  "Microsoft": 1,
   "VMware/Broadcom": 0,
   "Slice": 0,
   "Graviton Research": 0,
@@ -1517,6 +1522,7 @@
   "oracle|applicationsoftwareengineer1|blr",
   "oracle|corejavadeveloper|blr",
   "oracle|platformsoftwareengineer2|blr",
+  "oracle|seniorapplicationsolutiondeveloper|blr",
   "outnovate|backenddeveloper|blr",
   "pacewisdomsolutions|javadeveloper|blr",
   "paribusai|pythonbackendengineer|blr",
@@ -1598,7 +1604,7 @@
   "zinier|sde2javajeebackendfullstackdevelopment|blr"
  ],
  "cfg": "97687c30913b",
- "agg_cursor": 6,
+ "agg_cursor": 18,
  "last_hb": 1793641829.032776,
  "alerts": [
   1793641829.032776,
@@ -1615,6 +1621,7 @@
   1793641829.032776,
   1793641829.032776,
   1793641829.032776,
-  1793641829.032776
+  1793641829.032776,
+  1793671352.8107448
  ]
 }
