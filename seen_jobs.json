@@ -37,6 +37,7 @@
   "agg_0d2c98445c97924c",
   "agg_0d5fe4f6b1704cf0",
   "agg_0db9953fc205476e",
+  "agg_0e38450e2f706981",
   "agg_0f2e38b3678aa828",
   "agg_0f4aae1a86382b68",
   "agg_101209561a488a30",
@@ -246,6 +247,7 @@
   "agg_59d8fdb6d675ac22",
   "agg_59deb06c6a6c27d1",
   "agg_5ac46446c3f636b7",
+  "agg_5ba4bbaa117522ea",
   "agg_5bafac747dc9397d",
   "agg_5bb7f71854b5dc9f",
   "agg_5c4ab0e96099febd",
@@ -388,6 +390,7 @@
   "agg_94c57442386d3f1d",
   "agg_94faba42a68ef4d1",
   "agg_951a7fdf5bc738b4",
+  "agg_96d138cc2764a0e9",
   "agg_983a3c767a110d39",
   "agg_987268761612247c",
   "agg_98802b1bac9c2851",
@@ -494,6 +497,7 @@
   "agg_c4ac090fad898fa9",
   "agg_c4d2530f67d95c22",
   "agg_c50545b4473fe012",
+  "agg_c542a956f3d566d9",
   "agg_c5f727c95896ab20",
   "agg_c60177304aac6b51",
   "agg_c627d1afbe9cafa2",
@@ -1574,6 +1578,7 @@
   "cisco|softwareengineergojavadockerskubernetesaws|blr",
   "cisco|softwareengineergolangmicroservicescloud48yrsbangalore|blr",
   "cisco|softwareengineerjava20springreactspringboot48yrsexpbangalore|blr",
+  "cisco|softwareengineerjavafullstackreactjsnetworkingfrom4years|blr",
   "cisco|softwareengineerjavagolangpython2to4yearsbangalore|blr",
   "cisco|softwareengineerjavagolangpythoncc2to4yearsbangalore|blr",
   "cisco|softwareengineerjavagolangpythoncorc2to4yearsbangalore|blr",
@@ -1763,8 +1768,8 @@
   "zinier|sde2javajeebackendfullstackdevelopment|blr"
  ],
  "cfg": "97687c30913b",
- "agg_cursor": 18,
- "last_hb": 1793907096.8177135,
+ "agg_cursor": 30,
+ "last_hb": 1794009565.0342672,
  "alerts": [
   1793925963.3822818,
   1793925963.3822818,
@@ -1779,6 +1784,7 @@
   1793965909.9349046,
   1793965909.9349046,
   1793965909.9349046,
-  1793965909.9349046
+  1793965909.9349046,
+  1794009565.0342672
  ]
 }
