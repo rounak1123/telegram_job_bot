@@ -108,6 +108,7 @@
   "agg_278c8421ef645dbf",
   "agg_27a57f2c0b728097",
   "agg_27b9e3b1f1a1dbf2",
+  "agg_2a35dc72a548b1cb",
   "agg_2aace0773abc4e02",
   "agg_2ab82352d34e2a0a",
   "agg_2b07c43ae0dd878e",
@@ -1505,7 +1506,7 @@
   "Databricks": 0,
   "Stripe": 0,
   "Cred": 0,
-  "Microsoft": 0,
+  "Microsoft": 1,
   "VMware/Broadcom": 0,
   "Slice": 0,
   "Graviton Research": 0,
@@ -1787,7 +1788,7 @@
   "zinier|sde2javajeebackendfullstackdevelopment|blr"
  ],
  "cfg": "97687c30913b",
- "agg_cursor": 10,
+ "agg_cursor": 22,
  "last_hb": 1794009565.0342672,
  "alerts": [
   1794009565.0342672,
