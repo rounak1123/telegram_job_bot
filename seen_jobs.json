@@ -1506,7 +1506,7 @@
   "Databricks": 0,
   "Stripe": 0,
   "Cred": 0,
-  "Microsoft": 1,
+  "Microsoft": 0,
   "VMware/Broadcom": 0,
   "Slice": 0,
   "Graviton Research": 0,
@@ -1788,7 +1788,7 @@
   "zinier|sde2javajeebackendfullstackdevelopment|blr"
  ],
  "cfg": "97687c30913b",
- "agg_cursor": 22,
+ "agg_cursor": 34,
  "last_hb": 1794009565.0342672,
  "alerts": [
   1794009565.0342672,
