@@ -33,6 +33,7 @@
   "agg_0bf4774db200ed35",
   "agg_0c220e7c3de5cf75",
   "agg_0c4bd5d377d7db3a",
+  "agg_0c6570b149af03c1",
   "agg_0cfbe021b214ca10",
   "agg_0d005130ed5d5316",
   "agg_0d2c98445c97924c",
@@ -119,6 +120,7 @@
   "agg_2cdaf0c621e2c0a3",
   "agg_2d15546ceb8ff3df",
   "agg_2dae8488588e1295",
+  "agg_2de819afc5ba3548",
   "agg_2e0e91b2b95dc5ff",
   "agg_2e22e0749cd895b1",
   "agg_2e743cceb8c35b05",
@@ -264,6 +266,7 @@
   "agg_5e9a81b3a293d195",
   "agg_5f0d91f9908c4c4d",
   "agg_5f4ce1bf48d5628e",
+  "agg_5fe45ef6426f9fc0",
   "agg_60397b09b9de5a91",
   "agg_609ab8385cc2ca8f",
   "agg_60b76e57783f0ae5",
@@ -326,6 +329,7 @@
   "agg_761e3fb476db116d",
   "agg_764aab6797db8e13",
   "agg_76be0686ae1f11a7",
+  "agg_7732ca8af911e5d8",
   "agg_773761f61f14927e",
   "agg_78b7625a98af30f0",
   "agg_79c97c85a330358a",
@@ -343,6 +347,7 @@
   "agg_7feb5773acc365a4",
   "agg_806ce4f2174ab679",
   "agg_8155c030a33dd034",
+  "agg_81cf72af279dee4e",
   "agg_825791be3e86cb2a",
   "agg_82868494587d7bff",
   "agg_830d402e468b7206",
@@ -438,6 +443,7 @@
   "agg_a56a12a1a2810c23",
   "agg_a6628770f747886a",
   "agg_a67d93b2f9d1498c",
+  "agg_a6ddedad1e91e0f3",
   "agg_a74c5673809d1ecc",
   "agg_a7c71f3507ace4ea",
   "agg_a83c3114ef9f0637",
@@ -555,6 +561,7 @@
   "agg_d30c1be4f01ef152",
   "agg_d4656bb9b7e30107",
   "agg_d471d6078394304a",
+  "agg_d4898bbd2eaaf664",
   "agg_d4b93e977f9442be",
   "agg_d5037acaaa857b5d",
   "agg_d524406ef6802618",
@@ -1590,6 +1597,7 @@
   "capco|javafullstackdeveloper|blr",
   "capgeminiengineering|javadev|blr",
   "cgi|javabackenddeveloper|blr",
+  "chevron|javadeveloper|blr",
   "cisco|softwareengineer24yearsainativepythongolangjava|blr",
   "cisco|softwareengineer5to8yrsjavacicdclouddeployments|blr",
   "cisco|softwareengineerbackendpythongodistributedsystemscloud24years|blr",
@@ -1790,12 +1798,9 @@
   "zinier|sde2javajeebackendfullstackdevelopment|blr"
  ],
  "cfg": "97687c30913b",
- "agg_cursor": 2,
+ "agg_cursor": 14,
  "last_hb": 1794112237.8673005,
  "alerts": [
-  1794062576.8743076,
-  1794062576.8743076,
-  1794062576.8743076,
-  1794062576.8743076
+  1794149270.7457485
  ]
 }
