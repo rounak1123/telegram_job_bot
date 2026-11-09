@@ -30,6 +30,7 @@
   "agg_0a4bdffefdb1a2a0",
   "agg_0af1bc82657ad9d0",
   "agg_0b9e7ed2ebd7eb8d",
+  "agg_0bde452a7ee7042e",
   "agg_0bf4774db200ed35",
   "agg_0c220e7c3de5cf75",
   "agg_0c4bd5d377d7db3a",
@@ -1798,8 +1799,8 @@
   "zinier|sde2javajeebackendfullstackdevelopment|blr"
  ],
  "cfg": "97687c30913b",
- "agg_cursor": 26,
- "last_hb": 1794112237.8673005,
+ "agg_cursor": 38,
+ "last_hb": 1794199398.7475436,
  "alerts": [
   1794149270.7457485
  ]
