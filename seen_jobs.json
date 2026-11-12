@@ -1213,9 +1213,11 @@
   "rubrik|7956920",
   "rubrik|8256407",
   "rubrik|8258200",
+  "rubrik|8258201",
   "rubrik|8273699",
   "rubrik|8273808",
   "rubrik|8282005",
+  "rubrik|8327940",
   "salesforce|/job/India---Bangalore/AI-Engineer-Backend---LMTS-SMTS-MTS_JR340189-1",
   "salesforce|/job/India---Bangalore/Full-Stack-Developer---AI-Native-Engineering_JR359537",
   "salesforce|/job/India---Bangalore/Principal-Sales-Support-Engineer--ES-_JR354838",
@@ -1783,6 +1785,7 @@
   "resideo|softwareengineer2|blr",
   "rippling|softwareengineer2monetization|blr",
   "rippling|softwareengineer2|blr",
+  "rubrik|softwareengineercloudnativeprotection|blr",
   "rubrik|softwareengineerproductinfracoreservices|blr",
   "sabre|softwareengineer2|blr",
   "salesforce|dataengineeringmtssmtsetl|blr",
@@ -1856,7 +1859,7 @@
   "zinier|sde2javajeebackendfullstackdevelopment|blr"
  ],
  "cfg": "97687c30913b",
- "agg_cursor": 22,
+ "agg_cursor": 34,
  "last_hb": 1794412420.0876057,
  "alerts": [
   1794412420.0876057,
@@ -1865,6 +1868,7 @@
   1794412420.0876057,
   1794412420.0876057,
   1794412420.0876057,
-  1794412420.0876057
+  1794412420.0876057,
+  1794462536.9291978
  ]
 }
