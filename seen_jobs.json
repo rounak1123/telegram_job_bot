@@ -1063,6 +1063,7 @@
   "amazon|10605092",
   "amazon|10605712",
   "amazon|10606051",
+  "amazon|10607231",
   "amazon|10607547",
   "amazon|10607819",
   "amazon|10608163",
@@ -1773,7 +1774,7 @@
   "Amazon": 0,
   "Goldman Sachs": 0,
   "Morgan Stanley": 0,
-  "Adobe": 3,
+  "Adobe": 0,
   "Groww": 0,
   "Meesho": 0,
   "Salesforce": 3,
@@ -1781,9 +1782,9 @@
   "Zeta": 0,
   "Workday": 3,
   "PayPal": 3,
-  "Mastercard": 2,
+  "Mastercard": 3,
   "Target": 3,
-  "Lowe's": 1,
+  "Lowe's": 2,
   "JPMorgan Chase": 0,
   "Wells Fargo": 3,
   "Google": 0,
@@ -1791,7 +1792,7 @@
   "Stripe": 0,
   "Cred": 0,
   "Microsoft": 0,
-  "VMware/Broadcom": 1,
+  "VMware/Broadcom": 2,
   "Slice": 0,
   "Graviton Research": 0,
   "Tower Research": 0,
@@ -1848,6 +1849,7 @@
   "amazon|softwaredevelopmentengineeramazonbusinessindia|blr",
   "amazon|softwaredevelopmentengineerinamazonbusiness|blr",
   "amazon|softwaredevengineer23ppricing|blr",
+  "amazon|softwaredevengineer2advertising|blr",
   "amazon|softwaredevengineer2alexasmarthome|blr",
   "amazon|softwaredevengineer2amazondetailpage|blr",
   "amazon|softwaredevengineer2amazonnowtez|blr",
@@ -2133,10 +2135,11 @@
   "zinier|sde2javajeebackendfullstackdevelopment|blr"
  ],
  "cfg": "97687c30913b",
- "agg_cursor": 13,
+ "agg_cursor": 25,
  "last_hb": 1795324075.0243719,
  "alerts": [
   1795363089.2548072,
-  1795363089.2548072
+  1795363089.2548072,
+  1795383265.1158645
  ]
 }
