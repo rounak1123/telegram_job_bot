@@ -33,6 +33,7 @@
   "agg_0716f9370f9be370",
   "agg_07811c1398357f10",
   "agg_07c5121addf884bf",
+  "agg_08b347ea13b7f03d",
   "agg_093c402d4458df55",
   "agg_094db0ed097d334b",
   "agg_09824b54b9b02ea2",
@@ -1110,6 +1111,7 @@
   "amazon|10611480",
   "amazon|10611676",
   "amazon|10612911",
+  "amazon|10613545",
   "amazon|3120411",
   "amazon|3151381",
   "amazon|3156875",
@@ -1458,6 +1460,8 @@
   "oracle|350619",
   "oracle|350624",
   "oracle|350628",
+  "oracle|350748",
+  "oracle|350749",
   "oracle|350854",
   "oracle|350856",
   "paypal|/job/Bangalore-Karnataka-India/Senior-Software-Engineer---Fullstack_R0139037-1",
@@ -1837,8 +1841,8 @@
   "Oracle": 0,
   "Zeta": 0,
   "Workday": 3,
-  "PayPal": 1,
-  "Mastercard": 1,
+  "PayPal": 2,
+  "Mastercard": 2,
   "Target": 3,
   "Lowe's": 3,
   "JPMorgan Chase": 0,
@@ -2205,14 +2209,9 @@
   "zinier|sde2javajeebackendfullstackdevelopment|blr"
  ],
  "cfg": "97687c30913b",
- "agg_cursor": 20,
+ "agg_cursor": 32,
  "last_hb": 1795548146.9384596,
  "alerts": [
-  1795463561.455216,
-  1795463561.455216,
-  1795463561.455216,
-  1795463561.455216,
-  1795463561.455216,
   1795495115.166142,
   1795495115.166142,
   1795495115.166142,
@@ -2221,6 +2220,7 @@
   1795548146.9384596,
   1795548146.9384596,
   1795548146.9384596,
-  1795548146.9384596
+  1795548146.9384596,
+  1795577056.7166862
  ]
 }
